@@ -127,4 +127,3 @@ Versions tested:
     * [ ] ingress demo - host-based routing
     * [ ] ingress demo - kube-ingress-aws
       * [ ] kube-ingress-aws IAM policy
-# deploy-kube
