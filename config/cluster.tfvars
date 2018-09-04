@@ -96,6 +96,8 @@ kubernetes {
 
   // Extra management IP - Leave blank or add full CIDR here (Eg: 1.1.1.1/1,2.2.2.2/2 comma separated, no spaces)
   ingress_extra_ip      = "0.0.0.0/0"
+  letsencrypt_email     = "my.email@gmail.com"
+  letsencrypt_secret    = "deez-certs"
 }
 
 // Tags to apply to cluster resources
