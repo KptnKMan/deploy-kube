@@ -1,6 +1,7 @@
 # Kareems New Kubernetes
 
 This repository contains Kareems New Kubernetes Deployment configuration.
+It's designed to use outputs from and be built on top of the base Terraform [Base VPC and Bastion Deployment configuration](https://github.com/KptnKMan/deploy-vpc-aws).
 This is designed to bring up a cluster in AWS (Amazon Web Services) that is empty and ready to manipulate.
 This is intended to eventually reflect production-ready implementation.
 Currently it is in testing, and may not work.
