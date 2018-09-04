@@ -69,6 +69,26 @@ data "template_file" "deploy_demo_ingress_aws" {
   }
 }
 
+// Demo LetsEncrypt
+data "template_file" "deploy_demo_letsencrypt" {
+  template = "${file("terraform/templates/deploy_demo_letsencrypt.yaml")}"
+
+  vars {
+    cluster_dns        = "${var.kubernetes["cluster_dns"]}"
+    cluster_domain     = "${var.kubernetes["cluster_domain"]}"
+    namespace_public   = "${var.kubernetes["namespace_public"]}"
+    namespace_private  = "${var.kubernetes["namespace_private"]}"
+
+    domain               = "${var.dns_domain_public}"
+    url_letsencrypt      = "${var.dns_urls["url_letsencrypt"]}"
+    letsencrypt_email    = "${var.kubernetes["letsencrypt_email"]}"
+    letsencrypt_secret   = "${var.kubernetes["letsencrypt_secret"]}"
+
+    cluster_name_short = "${var.cluster_name_short}"
+    cluster_config_location = "${var.cluster_config_location}"
+  }
+}
+
 resource "null_resource" "deploys" {
   triggers  = {
     // Any change to UUID (every apply) triggers re-provisioning
@@ -88,6 +108,7 @@ resource "null_resource" "deploys" {
   provisioner "local-exec" { command = "cat > deploys/deploy_demo_nginx.yaml <<EOL\n${data.template_file.deploy_demo_nginx.rendered}\nEOL" }
   provisioner "local-exec" { command = "cat > deploys/deploy_demo_ingress.yaml <<EOL\n${data.template_file.deploy_demo_ingress.rendered}\nEOL" }
   provisioner "local-exec" { command = "cat > deploys/deploy_demo_ingress_aws.yaml <<EOL\n${data.template_file.deploy_demo_ingress_aws.rendered}\nEOL" }
+  provisioner "local-exec" { command = "cat > deploys/deploy_demo_letsencrypt.yaml <<EOL\n${data.template_file.deploy_demo_letsencrypt.rendered}\nEOL" }
 }
 
 // Outputs
