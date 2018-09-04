@@ -1,0 +1,101 @@
+#cloud-config
+
+write_files:
+  - path: /etc/systemd/system/docker.service
+    content: |
+      [Unit]
+
+      [Service]
+      MountFlags=shared
+
+      ExecStart=
+      ExecStart=/usr/bin/dockerd \
+        --storage-driver=overlay
+
+      Restart=on-failure
+      RestartSec=5
+
+      [Install]
+      WantedBy=multi-user.target
+
+  - path: /etc/systemd/system/etcd.service
+    content: |
+      [Unit]
+      After=docker.service
+      Requires=docker.service
+
+      [Service]
+      ExecStartPre=-/usr/bin/docker kill etcd-aws
+      ExecStartPre=-/usr/bin/docker rm -f etcd-aws
+      ExecStartPre=-/usr/bin/docker image rm kptnkman/etcd-aws-py
+
+      ExecStartPre=-/bin/mkdir -p /var/lib/etcd
+      ExecStart=/usr/bin/docker \
+        run \
+        --network host \
+        --rm \
+        --name etcd-aws \
+        -p 2379:2379 -p 2380:2380 \
+        -v /var/lib/etcd:/var/lib/etcd \
+        kptnkman/etcd-aws-py
+
+      Restart=always
+      RestartSec=15
+
+      [Install]
+      WantedBy=multi-user.target
+
+  - path: /etc/systemd/system/cfn-signal.service
+    content: |
+      [Unit]
+      Description=Cloudformation Signal Ready
+      After=etcd.service
+      Requires=etcd.service
+
+      [Service]
+      Type=oneshot
+      EnvironmentFile=/etc/environment
+      ExecStart=/bin/bash -c ' \
+        set -ex; \
+        eval $(docker run crewjam/ec2cluster); \
+        docker \
+          run \
+          --rm crewjam/awscli cfn-signal \
+          --resource Etcd${cluster_name_short} \
+          --stack $TAG_AWS_CLOUDFORMATION_STACK_ID \
+          --region $REGION || true; \
+      '
+
+      [Install]
+      WantedBy=multi-user.target
+
+  - path: /usr/bin/install_docker.sh
+    content: |
+      #!/bin/bash
+      set -e
+
+      mkdir -p /tmp/docker
+      cd /tmp/docker
+      wget https://download.docker.com/linux/static/stable/x86_64/docker-${docker_version}-ce.tgz
+      tar -xvf docker-${docker_version}-ce.tgz
+      sudo cp docker/docker* /usr/bin/
+
+  - path: /usr/bin/install_etcdctl.sh
+    content: |
+      #!/bin/bash
+      set -e
+
+      mkdir -p /tmp/etcd
+      cd /tmp/etcd
+      wget https://github.com/coreos/etcd/releases/download/v${etcd_version}/etcd-v${etcd_version}-linux-amd64.tar.gz
+      tar -xvf etcd-v${etcd_version}-linux-amd64.tar.gz
+      sudo cp etcd-v${etcd_version}-linux-amd64/etcdctl /usr/bin/
+      etcdctl version
+
+runcmd:
+  - apt-get update -qy
+  - apt-get install -qy bridge-utils awscli
+  - bash /usr/bin/install_docker.sh
+  - bash /usr/bin/install_etcdctl.sh
+  - systemctl enable /etc/systemd/system/docker.service /etc/systemd/system/etcd.service /etc/systemd/system/cfn-signal.service
+  - systemctl start docker.service etcd.service cfn-signal.service

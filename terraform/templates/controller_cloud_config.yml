@@ -1,0 +1,308 @@
+#cloud-config
+
+write_files:
+  - path: /etc/systemd/system/flannel.service
+    content: |
+      [Unit]
+      Description=Flannel Overlay Service Native
+      After=network.target
+
+      [Service]
+      Restart=always
+
+      ExecStartPre=-/sbin/modprobe ip_tables
+      # ETCDv2 set and read
+      ExecStartPre=/usr/bin/etcdctl --endpoint ${etcd_endpoints} set /coreos.com/network/config '{"Network":"${flannel_network}","Backend":{"Type":"vxlan"}}'
+      ExecStartPre=/usr/bin/etcdctl --endpoint ${etcd_endpoints} get /coreos.com/network/config
+      # ETCDv3 set and read
+      ExecStartPre=/bin/sh -c "ETCDCTL_API=3 /usr/bin/etcdctl --endpoints ${etcd_endpoints} put /coreos.com/network/config '{"Network":"${flannel_network}","Backend":{"Type":"vxlan"}}'"
+      ExecStartPre=/bin/sh -c "ETCDCTL_API=3 /usr/bin/etcdctl --endpoints ${etcd_endpoints} get /coreos.com/network/config"
+
+      ExecStart=/usr/bin/flanneld \
+        --etcd-endpoints=${etcd_endpoints} \
+        --ip-masq=false
+
+      ExecStartPost=/bin/bash -c "/bin/sleep 20 && cat /run/flannel/subnet.env > /etc/flannel.env"
+
+      [Install]
+      WantedBy=multi-user.target
+
+  - path: /etc/systemd/system/docker.service
+    content: |
+      [Unit]
+      Description=Docker instance for bootstrap components like etcd and flannel
+      After=flannel.service
+      Requires=flannel.service
+
+      [Service]
+      TimeoutStartSec=5
+      Restart=always
+
+      EnvironmentFile=/etc/flannel.env
+
+      LimitNOFILE=1048576
+      LimitNPROC=104857
+
+      ExecStart=/usr/bin/dockerd \
+        --storage-driver=overlay \
+        --iptables=false \
+        --ip-masq=false \
+        --bip=$${FLANNEL_SUBNET} \
+        --mtu=$${FLANNEL_MTU}
+
+      [Install]
+      WantedBy=multi-user.target
+
+  - path: /etc/systemd/system/kube-apiserver.service
+    content: |
+      [Unit]
+      Description=Kubernetes API Server
+      Documentation=https://github.com/GoogleCloudPlatform/kubernetes
+
+      [Service]
+      Restart=on-failure
+      RestartSec=5
+
+      EnvironmentFile=/etc/environment
+
+      ExecStart=/usr/bin/kube-apiserver \
+        --etcd-servers=${etcd_endpoints} \
+        --secure-port=${api_server_secure_port} \
+        --insecure-port=${api_server_insecure_port} \
+        --service-cluster-ip-range=${service_ip_range} \
+        --runtime-config=${apiserver_runtime} \
+        --authorization-mode=${authorization_mode} \
+        --admission-control=${admission_control} \
+        --cloud-provider=aws \
+        --advertise-address=${NODE_IP} \
+        --bind-address=${NODE_IP} \
+        --insecure-bind-address=${NODE_IP} \
+        --enable-swagger-ui=true \
+        --allow-privileged=true \
+        --tls-cert-file=/etc/kubernetes/ssl/apiserver.pem \
+        --tls-private-key-file=/etc/kubernetes/ssl/apiserver.key \
+        --service-account-key-file=/etc/kubernetes/ssl/apiserver.key \
+        --client-ca-file=/etc/kubernetes/ssl/ca.pem \
+        --storage-backend=etcd3 \
+        --target-ram-mb=2048 \
+        --v=2
+
+        # --apiserver-count=2
+        # --authorization-policy-file=/var/lib/kubernetes/authorization-policy.jsonl
+        # --enable-swagger-ui=true
+        # --etcd-cafile=/var/lib/kubernetes/ca.pem
+        # --kubelet-certificate-authority=/var/lib/kubernetes/ca.pem
+        # --service-node-port-range=30000-32767
+        # --token-auth-file=/var/lib/kubernetes/token.csv
+
+      [Install]
+      WantedBy=multi-user.target
+
+  - path: /etc/systemd/system/kube-controller-manager.service
+    content: |
+      [Unit]
+      Description=Kubernetes Controller Manager
+      Documentation=https://github.com/GoogleCloudPlatform/kubernetes
+
+      [Service]
+      Restart=on-failure
+      RestartSec=5
+
+      EnvironmentFile=/etc/environment
+
+      ExecStart=/usr/bin/kube-controller-manager \
+        --master=http://${NODE_IP}:${api_server_insecure_port} \
+        --leader-elect=true \
+        --cloud-provider=aws \
+        --configure-cloud-routes=false \
+        --cluster-name=kubernetes \
+        --cluster-cidr=${flannel_network} \
+        --service-cluster-ip-range=${service_ip_range} \
+        --service-account-private-key-file=/etc/kubernetes/ssl/apiserver.key \
+        --root-ca-file=/etc/kubernetes/ssl/ca.pem \
+        --allocate-node-cidrs=true \
+        --v=2
+
+        # --cluster-name=${cluster_name_short} \
+        # --configure-cloud-routes=false \
+        # You can have it use an existing VPC route table by tagging the route table with the tag:
+        # KubernetesCluster=kubernetes
+
+      [Install]
+      WantedBy=multi-user.target
+
+  - path: /etc/systemd/system/kube-scheduler.service
+    content: |
+      [Unit]
+      Description=Kubernetes Scheduler
+      Documentation=https://github.com/GoogleCloudPlatform/kubernetes
+
+      [Service]
+      Restart=on-failure
+      RestartSec=5
+
+      EnvironmentFile=/etc/environment
+
+      ExecStart=/usr/bin/kube-scheduler \
+        --master=http://${NODE_IP}:${api_server_insecure_port} \
+        --leader-elect=true \
+        --v=2
+
+      [Install]
+      WantedBy=multi-user.target
+
+  - path: /etc/systemd/system/kube-proxy.service
+    content: |
+      [Unit]
+      Description=Kubernetes Kube Proxy
+      Documentation=https://github.com/GoogleCloudPlatform/kubernetes
+
+      [Service]
+      Restart=on-failure
+      RestartSec=5
+
+      EnvironmentFile=/etc/environment
+
+      ExecStart=/usr/bin/kube-proxy \
+        --config=/etc/kubernetes/kube-proxy.conf
+
+        # --master=http://${NODE_IP}:${api_server_insecure_port} \
+        # --kubeconfig=/etc/kubernetes/kubeconfig.yaml \
+        # --proxy-mode=iptables \
+        # --v=2
+
+      [Install]
+      WantedBy=multi-user.target
+
+  - path: /etc/kubernetes/kube-proxy.conf
+    content: |
+      apiVersion: kubeproxy.config.k8s.io/v1alpha1
+      bindAddress: {{NODE_IP}}
+      clientConnection:
+        acceptContentTypes: ""
+        burst: 10
+        contentType: application/vnd.kubernetes.protobuf
+        kubeconfig: /etc/kubernetes/kubeconfig.yaml
+        qps: 5
+      clusterCIDR: ${service_ip_range}
+      configSyncPeriod: 15m0s
+      conntrack:
+        max: 0
+        maxPerCore: 32768
+        min: 131072
+        tcpCloseWaitTimeout: 1h0m0s
+        tcpEstablishedTimeout: 24h0m0s
+      enableProfiling: false
+      healthzBindAddress: {{NODE_IP}}:10256
+      hostnameOverride: ""
+      iptables:
+        masqueradeAll: false
+        masqueradeBit: 14
+        minSyncPeriod: 0s
+        syncPeriod: 30s
+      ipvs:
+        minSyncPeriod: 0s
+        scheduler: ""
+        syncPeriod: 30s
+      kind: KubeProxyConfiguration
+      metricsBindAddress: {{NODE_IP}}:10249
+      mode: iptables
+      nodePortAddresses: null
+      oomScoreAdj: -999
+      portRange: ""
+      resourceContainer: /kube-proxy
+      udpIdleTimeout: 250ms
+
+  - path: /etc/kubernetes/kubeconfig.yaml
+    content: |
+      apiVersion: v1
+      kind: Config
+      clusters:
+      - name: local
+        cluster:
+          certificate-authority: /etc/kubernetes/ssl/ca.pem
+          server: http://{{NODE_IP}}:${api_server_insecure_port}
+      contexts:
+      - context:
+          cluster: local
+          user: kubelet
+        name: kubelet
+      users:
+      - name: kubelet
+        user:
+          client-certificate: /etc/kubernetes/ssl/apiserver.pem
+          client-key: /etc/kubernetes/ssl/apiserver.key
+      current-context: kubelet
+
+  - path: /usr/bin/download_certs.sh
+    content: |
+      #!/bin/bash
+      set -e
+
+      # Test connection to S3
+      aws s3 ls s3://kareempoc-state/ssl/
+
+      # Download certs
+      aws s3 cp s3://kareempoc-state/ssl/ca.pem /etc/kubernetes/ssl/ca.pem
+      aws s3 cp s3://kareempoc-state/ssl/apiserver.key /etc/kubernetes/ssl/apiserver.key
+      aws s3 cp s3://kareempoc-state/ssl/apiserver.pem /etc/kubernetes/ssl/apiserver.pem
+
+  - path: /usr/bin/install_etcdctl.sh
+    content: |
+      #!/bin/bash
+      set -e
+
+      mkdir -p /tmp/etcd
+      cd /tmp/etcd
+      wget https://github.com/coreos/etcd/releases/download/v${etcd_version}/etcd-v${etcd_version}-linux-amd64.tar.gz
+      tar -xvf etcd-v${etcd_version}-linux-amd64.tar.gz
+      sudo cp etcd-v${etcd_version}-linux-amd64/etcdctl /usr/bin/
+      etcdctl --version
+
+  - path: /usr/bin/install_kubernetes.sh
+    content: |
+      #!/bin/bash
+      set -e
+
+      wget --quiet -O /usr/bin/flanneld https://github.com/coreos/flannel/releases/download/v${flannel_version}/flanneld-amd64
+      chmod +x /usr/bin/flanneld
+
+      mkdir -p /tmp/docker
+      cd /tmp/docker
+      wget https://download.docker.com/linux/static/stable/x86_64/docker-${docker_version}-ce.tgz
+      tar -xvf docker-${docker_version}-ce.tgz
+      sudo cp docker/docker* /usr/bin/
+
+      wget --quiet -O /usr/bin/kube-apiserver https://storage.googleapis.com/kubernetes-release/release/v${kubernetes_version}/bin/linux/amd64/kube-apiserver
+      wget --quiet -O /usr/bin/kube-controller-manager https://storage.googleapis.com/kubernetes-release/release/v${kubernetes_version}/bin/linux/amd64/kube-controller-manager
+      wget --quiet -O /usr/bin/kube-scheduler https://storage.googleapis.com/kubernetes-release/release/v${kubernetes_version}/bin/linux/amd64/kube-scheduler
+      wget --quiet -O /usr/bin/kube-proxy https://storage.googleapis.com/kubernetes-release/release/v${kubernetes_version}/bin/linux/amd64/kube-proxy
+      chmod +x /usr/bin/kube-*
+
+  - path: /usr/bin/node_prep.sh
+    content: |
+      #!/bin/bash
+      set -e
+
+      # net.ipv4.ip_forward = 1
+      NODE_FQDN=$(wget -q -O - http://169.254.169.254/latest/meta-data/hostname)
+      NODE_IP=$(wget -q -O - http://169.254.169.254/latest/meta-data/local-ipv4)
+
+      # Environment File
+      echo "NODE_FQDN=$NODE_FQDN" >> /etc/environment
+      echo "NODE_IP=$NODE_IP" >> /etc/environment
+
+      # Complete kubeconfig
+      sed -i -e "s/{{NODE_IP}}/$NODE_IP/g" /etc/kubernetes/kubeconfig.yaml
+      # Complete kube-proxy config file
+      sed -i -e "s/{{NODE_IP}}/$NODE_IP/g" /etc/kubernetes/kube-proxy.conf
+
+runcmd:
+  - apt-get update -qy
+  - apt-get install -qy bridge-utils nfs-common socat ntp awscli
+  - bash /usr/bin/node_prep.sh
+  - bash /usr/bin/download_certs.sh
+  - bash /usr/bin/install_etcdctl.sh
+  - bash /usr/bin/install_kubernetes.sh
+  - systemctl enable /etc/systemd/system/flannel.service /etc/systemd/system/docker.service /etc/systemd/system/kube-apiserver.service /etc/systemd/system/kube-controller-manager.service /etc/systemd/system/kube-scheduler.service /etc/systemd/system/kube-proxy.service
+  - systemctl start flannel.service docker.service kube-apiserver.service kube-controller-manager.service kube-scheduler.service kube-proxy.service

@@ -1,0 +1,367 @@
+#cloud-config
+
+write_files:
+  - path: /etc/logrotate.d/containers
+    content: |
+      /var/lib/docker/containers/*/*-json.log {
+          rotate 5
+          copytruncate
+          missingok
+          notifempty
+          compress
+          maxsize 10M
+          daily
+          create 0644 root root
+      }
+
+  - path: /etc/systemd/system/docker-bootstrap.service
+    content: |
+      [Unit]
+      Description=Docker instance for bootstrap components like etcd and flannel
+      After=network.target
+
+      [Service]
+      Restart=always
+      RestartSec=20
+
+      LimitNOFILE=1048576
+      LimitNPROC=104857
+
+      # Disable swap, required as standard on kubelet 1.8.x
+      ExecStartPre=-/sbin/sysctl vm.swappiness=0
+      ExecStartPre=-/sbin/swapoff -a
+
+      ExecStart=/usr/bin/dockerd \
+        --storage-driver=overlay \
+        --iptables=false \
+        --ip-masq=false \
+        --bridge=docker0 \
+        --exec-root=/var/run/docker-bootstrap \
+        --data-root=/var/lib/docker-bootstrap \
+        --host=unix://var/run/docker-bootstrap.sock \
+        --pidfile=/var/run/docker-bootstrap.pid
+
+        #--containerd=/var/run/docker/containerd/docker-bootstrap-containerd.sock
+
+      [Install]
+      WantedBy=multi-user.target
+
+  - path: /etc/systemd/system/flannel.service
+    content: |
+      [Unit]
+      Description=Flannel
+      Requires=docker-bootstrap.service
+      After=docker-bootstrap.service
+
+      [Service]
+      TimeoutStartSec=0
+      ExecStartPre=-/sbin/modprobe ip_tables
+
+      ExecStartPre=-/usr/bin/docker -H unix:///var/run/docker-bootstrap.sock kill flannel
+      ExecStartPre=-/usr/bin/docker -H unix:///var/run/docker-bootstrap.sock rm -f flannel
+      ExecStartPre=-/usr/bin/docker -H unix:///var/run/docker-bootstrap.sock image rm flannel
+      ExecStartPre=-/usr/bin/docker -H unix:///var/run/docker-bootstrap.sock rmi $(/usr/bin/docker -H unix:///var/run/docker-bootstrap.sock images | grep 'flannel')
+      ExecStartPre=-/usr/bin/docker -H unix:///var/run/docker-bootstrap.sock pull quay.io/coreos/flannel:v${flannel_version}
+
+      ExecStart=/usr/bin/docker \
+        -H unix:///var/run/docker-bootstrap.sock \
+        run \
+        --rm \
+        --net=host \
+        --privileged \
+        --name=flannel \
+        --volume=/dev/net:/dev/net \
+        quay.io/coreos/flannel:v${flannel_version} \
+        --ip-masq=false \
+        --etcd-endpoints=${etcd_endpoints}
+
+      ExecStartPost=/bin/bash -c "/bin/sleep 20 && /usr/bin/docker -H unix:///var/run/docker-bootstrap.sock exec flannel cat /run/flannel/subnet.env > /etc/flannel.env"
+
+      ExecStop=/usr/bin/docker -H unix:///var/run/docker-bootstrap.sock stop flannel
+
+      Restart=always
+      RestartSec=10
+
+      [Install]
+      WantedBy=multi-user.target
+
+  - path: /etc/systemd/system/docker.service
+    content: |
+      [Unit]
+      Description=Docker instance for Kubernetes
+      After=flannel.service
+      Requires=flannel.service
+
+      [Service]
+      Restart=always
+      RestartSec=30
+
+      EnvironmentFile=/etc/flannel.env
+      MountFlags=shared
+
+      #ExecStartPre=-/sbin/ifconfig docker0 down
+      #ExecStartPre=-/sbin/brctl delbr docker0
+
+      ExecStart=/usr/bin/dockerd \
+        --storage-driver=overlay \
+        --iptables=false \
+        --ip-masq=false \
+        --bip=$${FLANNEL_SUBNET} \
+        --mtu=$${FLANNEL_MTU} \
+        --exec-root=/var/run/docker \
+        --data-root=/var/lib/docker \
+        --host=unix://var/run/docker.sock \
+        --pidfile=/var/run/docker.pid
+
+        #--containerd=/var/run/docker/containerd/docker-containerd.sock
+
+      [Install]
+      WantedBy=multi-user.target
+
+  - path: /etc/systemd/system/kubelet.service
+    content: |
+      [Unit]
+      After=docker.service
+      Requires=docker.service
+
+      [Service]
+      ExecStartPre=/bin/mkdir -p /opt/cni/bin
+      ExecStartPre=/bin/mkdir -p /etc/kubernetes/manifests
+      ExecStartPre=/bin/mkdir -p /etc/kubernetes/cni/net.d
+      ExecStartPre=/bin/mkdir -p /var/lib/cni
+      ExecStartPre=/bin/mkdir -p /var/lib/kubelet/volumeplugins
+
+      ExecStart=/usr/bin/kubelet \
+        --cloud-provider=aws \
+        --allow-privileged=true \
+        --cluster-dns=${cluster_dns} \
+        --cluster-domain=${cluster_domain} \
+        --container-runtime=docker \
+        --docker=unix:///var/run/docker.sock \
+        --kubeconfig=/etc/kubernetes/kubeconfig.yaml \
+        --serialize-image-pulls=false \
+        --pod-manifest-path=/etc/kubernetes/manifests \
+        --register-schedulable=true \
+        --node-labels="instance-group=${instance_group}" \
+        --tls-cert-file=/etc/kubernetes/ssl/worker.pem \
+        --tls-private-key-file=/etc/kubernetes/ssl/worker.key \
+        --v=2
+
+        # --network-plugin=kubenet
+        # --kubeconfig=/etc/kubernetes/kubeconfig.yaml \
+        # --tls-cert-file=/etc/kubernetes/ssl/worker.pem \
+        # --tls-private-key-file=/etc/kubernetes/ssl/worker.key
+
+        # --api-servers=https://${kubernetes_api_elb_internal}:${api_server_secure_port} \ unknown/removed?
+        # --reconcile-cidr=true \ unknown/removed?
+        # --configure-cbr0=true \ unknown/removed?
+        # --allow-privileged=true \ removed soon
+        # # --cluster-dns=${cluster_dns} \ config file
+        # # --cluster-domain=${cluster_domain} \ config file
+        # # --enable-controller-attach-detach=false \ config file
+        # --node-labels="instance-group=${instance_group}" \
+        # # --pod-manifest-path=/etc/kubernetes/manifests \ config file
+        # --require-kubeconfig=true \
+        # --register-schedulable=true \
+        #--fail-swap-on=false
+        #--v=2
+
+      Restart=always
+      RestartSec=10
+
+      [Install]
+      WantedBy=multi-user.target
+
+  - path: /etc/systemd/system/kube-proxy.service
+    content: |
+      [Unit]
+      Description=Kubernetes Kube Proxy
+      Documentation=https://github.com/GoogleCloudPlatform/kubernetes
+
+      After=docker.service
+      Requires=docker.service
+
+      [Service]
+      ExecStart=/usr/bin/kube-proxy \
+        --config=/etc/kubernetes/kube-proxy.conf
+
+        # --master=https://${kubernetes_api_elb_internal}:${api_server_secure_port} \
+        # --kubeconfig=/etc/kubernetes/kubeconfig.yaml \
+        # --proxy-mode=iptables \
+        # --v=2
+
+      Restart=always
+      RestartSec=10
+
+      [Install]
+      WantedBy=multi-user.target
+
+  - path: /etc/kubernetes/kube-proxy.conf
+    content: |
+      apiVersion: kubeproxy.config.k8s.io/v1alpha1
+      bindAddress: 0.0.0.0
+      clientConnection:
+        acceptContentTypes: ""
+        burst: 10
+        contentType: application/vnd.kubernetes.protobuf
+        kubeconfig: /etc/kubernetes/kubeconfig.yaml
+        qps: 5
+      clusterCIDR: ${service_ip_range}
+      configSyncPeriod: 15m0s
+      conntrack:
+        max: 0
+        maxPerCore: 32768
+        min: 131072
+        tcpCloseWaitTimeout: 1h0m0s
+        tcpEstablishedTimeout: 24h0m0s
+      enableProfiling: false
+      healthzBindAddress: 0.0.0.0:10256
+      hostnameOverride: ""
+      iptables:
+        masqueradeAll: false
+        masqueradeBit: 14
+        minSyncPeriod: 0s
+        syncPeriod: 30s
+      ipvs:
+        minSyncPeriod: 0s
+        scheduler: ""
+        syncPeriod: 30s
+      kind: KubeProxyConfiguration
+      metricsBindAddress: 127.0.0.1:10249
+      mode: iptables
+      nodePortAddresses: null
+      oomScoreAdj: -999
+      portRange: ""
+      resourceContainer: /kube-proxy
+      udpIdleTimeout: 250ms
+
+  - path: /etc/kubernetes/kubeconfig.yaml
+    content: |
+      apiVersion: v1
+      kind: Config
+      clusters:
+      - name: local
+        cluster:
+          certificate-authority: /etc/kubernetes/ssl/ca.pem
+          server: https://${kubernetes_api_elb_internal}:${api_server_secure_port}
+      contexts:
+      - context:
+          cluster: local
+          user: kubelet
+        name: kubelet
+      users:
+      - name: kubelet
+        user:
+          client-certificate: /etc/kubernetes/ssl/worker.pem
+          client-key: /etc/kubernetes/ssl/worker.key
+      current-context: kubelet
+
+  - path: /usr/bin/download_certs.sh
+    content: |
+      #!/bin/bash
+      set -e
+
+      # Test connection to S3
+      aws s3 ls s3://kareempoc-state/ssl/
+
+      # Download certs
+      aws s3 cp s3://kareempoc-state/ssl/ca.key /etc/kubernetes/ssl/ca.key
+      aws s3 cp s3://kareempoc-state/ssl/ca.pem /etc/kubernetes/ssl/ca.pem
+      aws s3 cp s3://kareempoc-state/ssl/worker.key /etc/kubernetes/ssl/worker.key
+
+  - path: /etc/kubernetes/ssl/worker_openssl.cnf
+    owner: root
+    permissions: 0755
+    content: |
+      [req]
+      req_extensions = v3_req
+      distinguished_name = req_distinguished_name
+      [req_distinguished_name]
+      [ v3_req ]
+      basicConstraints = CA:FALSE
+      keyUsage = nonRepudiation, digitalSignature, keyEncipherment
+      subjectAltName = @alt_names
+      [alt_names]
+      DNS.1 = *.*.${cluster_domain}
+      DNS.2 = kubernetes
+      DNS.3 = kubernetes.default
+      DNS.4 = kubernetes.default.svc
+      DNS.5 = kubernetes.default.svc.cluster.local
+      DNS.6 = ${url_admiral}.${dns_domain_public}
+      DNS.7 = *.${dns_domain_public}
+      DNS.8 = *.${aws_region}.compute.internal
+      DNS.9 = *.${aws_region}.compute.amazonaws.com
+      IP.1 = {{NODE_IP}}
+      IP.2 = 127.0.0.1
+
+  - path: /etc/kubernetes/ssl/generate_tls_keys.sh
+    owner: root
+    permissions: 0755
+    content: |
+      #! /bin/bash
+      set -e
+      if [ ! -f /etc/kubernetes/ssl/worker.pem ]; then
+        echo "Hostname = $NODE_FQDN"
+        echo "IP1 = $NODE_IP"
+
+        echo "Generating TLS keys."
+        cd /etc/kubernetes/ssl
+        # openssl genrsa -out worker.key 2048
+        NODE_IP=${1} openssl req -new -key worker.key -out worker.csr -subj "/C=AU/ST=Some-State/O=system:nodes/CN=system:node:{{NODE_FQDN}}" -config worker_openssl.cnf
+        NODE_IP=${1} openssl x509 -req -in worker.csr -CA ca.pem -CAkey ca.key -CAcreateserial -out worker.pem -days 365 -extensions v3_req -extfile worker_openssl.cnf
+      fi
+      # Set permissions.
+      sudo chmod 600 /etc/kubernetes/ssl/worker.key
+      sudo chown root:root /etc/kubernetes/ssl/worker.key
+
+  - path: /etc/kubernetes/ssl/create_tls_keys.sh
+    owner: root
+    permissions: 0755
+    content: |
+      #! /bin/bash
+      NODE_FQDN=$(wget -q -O - http://169.254.169.254/latest/meta-data/hostname)
+      NODE_IP=$(wget -q -O - http://169.254.169.254/latest/meta-data/local-ipv4)
+
+      ## Create TLS keys
+      sed -i -e "s/{{NODE_IP}}/$NODE_IP/g" /etc/kubernetes/ssl/worker_openssl.cnf
+      # sed -i -e "s/{{CLUSTER_DOMAIN}}/${cluster_domain}/g" /etc/kubernetes/ssl/worker_openssl.cnf
+      sed -i -e "s/{{NODE_FQDN}}/$NODE_FQDN/g" /etc/kubernetes/ssl/generate_tls_keys.sh
+      source /etc/kubernetes/ssl/generate_tls_keys.sh
+
+  - path: /usr/bin/install_kubernetes.sh
+    content: |
+      #!/bin/bash
+      set -e
+
+      mkdir /tmp/docker
+      cd /tmp/docker
+      wget https://download.docker.com/linux/static/stable/x86_64/docker-${docker_version}-ce.tgz
+      tar -xvf docker-${docker_version}-ce.tgz
+      sudo cp docker/docker* /usr/bin/
+
+      wget --quiet  -O /usr/bin/kubelet https://storage.googleapis.com/kubernetes-release/release/v${kubernetes_version}/bin/linux/amd64/kubelet
+      wget --quiet  -O /usr/bin/kube-proxy https://storage.googleapis.com/kubernetes-release/release/v${kubernetes_version}/bin/linux/amd64/kube-proxy
+      chmod +x /usr/bin/kubelet /usr/bin/kube-proxy
+
+  - path: /usr/bin/node_prep.sh
+    content: |
+      #!/bin/bash
+      set -e
+
+      #net.ipv4.ip_forward = 1
+      NODE_FQDN=$(wget -q -O - http://169.254.169.254/latest/meta-data/hostname)
+      NODE_IP=$(wget -q -O - http://169.254.169.254/latest/meta-data/local-ipv4)
+
+      # Environment file
+      echo "NODE_FQDN=$NODE_FQDN" >> /etc/environment
+      echo "NODE_IP=$NODE_IP" >> /etc/environment
+
+runcmd:
+  - apt-get update -qy
+  - apt-get install -qy bridge-utils nfs-common socat ntp awscli
+  - bash /usr/bin/node_prep.sh
+  - bash /usr/bin/download_certs.sh
+  - bash /etc/kubernetes/ssl/create_tls_keys.sh
+  - bash /usr/bin/install_kubernetes.sh
+  - systemctl enable /etc/systemd/system/docker-bootstrap.service /etc/systemd/system/flannel.service /etc/systemd/system/docker.service /etc/systemd/system/kubelet.service /etc/systemd/system/kube-proxy.service
+  - systemctl start docker-bootstrap.service flannel.service docker.service kubelet.service kube-proxy.service

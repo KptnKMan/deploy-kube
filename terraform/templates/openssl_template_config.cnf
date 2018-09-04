@@ -1,0 +1,26 @@
+[req]
+req_extensions = v3_req
+distinguished_name = req_distinguished_name
+
+[req_distinguished_name]
+countryName            = NL
+stateOrProvinceName    = Zuid-Holland
+localityName           = Amsterdam
+organizationName       = KareemDevOps
+organizationalUnitName = DevOps-Engineering
+commonName             = kubernetes
+emailAddress           = kareem@straker.me
+
+[ v3_req ]
+basicConstraints = CA:FALSE
+keyUsage = nonRepudiation, digitalSignature, keyEncipherment
+
+#subjectAltName = @alt_names
+#[alt_names]
+#DNS.1 = kubernetes
+#DNS.2 = kubernetes.cluster.local
+#IP.1 = 127.0.0.1
+
+#subjectAltName = DNS:www.example.com,DNS:www2.example.com # multidomain certificate
+#subjectAltName = DNS:moe.ibm.com, DNS:larry.ibm.com, email:curly@moe.org
+#subjectAltName = DNS:${elb_name}, DNS:*.*.cluster.local, DNS:kubernetes, DNS:*.${aws_region}.compute.internal, DNS:*.${aws_region}.compute.amazonaws.com, IP:$ENV::WORKER_IP, IP:127.0.0.1
