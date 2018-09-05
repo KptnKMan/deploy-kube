@@ -8,15 +8,15 @@ Currently it is in testing, and may not work.
 
 It contains:
 
-* (WIP) Documentation for setup and management
-* (WIP) Deployment Cluster (Kubernetes)
-* (TBC) Production Cluster (Kubernetes)
-* (TBC) Scripts to create and update infrastructure
-* (TBC) Default configuration and settings to build environment
+* [x] Documentation for setup and management
+* [x] Deployment Kubernetes Cluster
+* [ ] Default configuration and settings to build environment
+* [x] Scripts to create, update and cleanup infrastructure
+* [ ] Demo details of things to do with Kubernetes
 
 Additional documentation for setup can be found in [docs](docs), when they become available.
 
-Best to start at the [Setup doc](docs/setup.md) to setup an environment.
+Best to start at the [Setup doc](https://github.com/KptnKMan/deploy-vpc-aws/docs/setup.md) to setup an environment.
 
 ## Basic Requirements
 
