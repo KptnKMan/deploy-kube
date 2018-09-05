@@ -1,14 +1,13 @@
+**/aws_credentials.*
 **/.DS_Store
 **/._.DS_Store
 .DS_Store
 ._.DS_Store
 .ignore/*
-.terraform
+.terraform/*
 .kube/*
-.vscode
-aws_credentials.*
+.vscode/*
 config/cluster.state*
-config/kareem*
 config/kubeconfig
 config/ssl/*
 deploys/*
