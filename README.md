@@ -22,8 +22,10 @@ Best to start at the [Setup doc](docs/setup.md) to setup an environment.
 
 * kubectl 1.10.6+
 * Terraform 0.11.7
-* Ansible 2.4.1.0+
-* an ssh public/private keypair in /config dir
+* ~~Ansible 2.4.1.0+~~
+* ~~an ssh public/private keypair in /config dir~~
+  * the ssh-keypair name is inherited from the output of the parent base vpc
+  * the ssh-keypair will be auto-generated into the /config dir of the [base vpc](https://github.com/KptnKMan/deploy-vpc-aws)
 
 ## Main Components
 
@@ -82,12 +84,18 @@ Versions tested:
     * encrypted S3?
     * hashicorp vault?
     * simple DB storage?
-  * [ ] paramaterise SSL .cnf template
+  * [x] paramaterise SSL .cnf template
   * [x] translate SSL provisioning to terraform native
-  * [ ] terraform provision instance SSH keypair
+  * [x] terraform provision instance SSH keypair
 * documentation
   * [ ] setup doc with example cli commands
   * [ ] demo doc with example cli commands
+  * [ ] Create working demo of Kube services including ELB-ingress
+    * [x] core services - kube-dns & dashboard
+    * [ ] ingress demo - basic
+    * [ ] ingress demo - host-based routing
+    * [ ] ingress demo - kube-ingress-aws
+      * [ ] kube-ingress-aws IAM policy
 * etcd concerns
   * [x] resolve etcd provisioning
   * [x] update etcd to latest 3.x+
@@ -104,9 +112,9 @@ Versions tested:
   * [ ] update kube to latest 1.x.x alpha (1.13.0-alpha.0)
   * [ ] cluster autoscaling (cluster-autoscaler?) (kube-aws-autoscaler?)
     * [ ] autoscaler IAM policy
-  * [ ] figure out friggin v1.8.x RBAC!
+  * [x] figure out friggin v1.8.x RBAC!
   * [ ] RBAC: get basic roles organised/documented
-  * [ ] RBAC: get kubelet node role organised (requires at-deploy provisioning certs)
+  * [x] RBAC: get kubelet node role organised (requires at-deploy provisioning certs)
 * terraform
   * [x] update terraform to latest 10.x
   * [ ] update terraform to latest 11.x
@@ -122,9 +130,3 @@ Versions tested:
   * [ ] develop multi-cloud extension
 * other
   * [x] FYI: Kube 1.8.x worker kubelet requires "--kube-swap-on=false" as swap is undesired.
-  * [ ] Create working demo of Kube services including ELB-ingress
-    * [x] core services - kube-dns & dashboard
-    * [ ] ingress demo - basic
-    * [ ] ingress demo - host-based routing
-    * [ ] ingress demo - kube-ingress-aws
-      * [ ] kube-ingress-aws IAM policy
