@@ -6,21 +6,21 @@ resource "aws_security_group" "kubernetes_public_elb_sg" {
 
 # Allow incoming HTTPS from public internet
   ingress {
-    from_port   = "443"
-    to_port     = "443"
+    from_port   = "${var.kubernetes["public_elb_port_https"]}"
+    to_port     = "${var.kubernetes["public_elb_port_https"]}"
     protocol    = "tcp"
     cidr_blocks = [
-      "${var.kubernetes["ingress_cidr_public"]}"
+      "${var.kubernetes["public_elb_cidr"]}"
     ]
   }
 
 # Allow incoming HTTP from public internet
   ingress {
-    from_port   = "80"
-    to_port     = "80"
+    from_port   = "${var.kubernetes["public_elb_port_http"]}"
+    to_port     = "${var.kubernetes["public_elb_port_http"]}"
     protocol    = "tcp"
     cidr_blocks = [
-      "${var.kubernetes["ingress_cidr_public"]}"
+      "${var.kubernetes["public_elb_cidr"]}"
     ]
   }
 
@@ -61,14 +61,14 @@ resource "aws_elb" "kubernetes_public_elb" {
   listener {
     instance_port     = "${var.kubernetes["ingress_port_https"]}"
     instance_protocol = "tcp"
-    lb_port           = "443"
+    lb_port           = "${var.kubernetes["public_elb_port_https"]}"
     lb_protocol       = "tcp"
   }
 
   listener {
     instance_port     = "${var.kubernetes["ingress_port_http"]}"
     instance_protocol = "tcp"
-    lb_port           = "80"
+    lb_port           = "${var.kubernetes["public_elb_port_http"]}"
     lb_protocol       = "tcp"
   }
 

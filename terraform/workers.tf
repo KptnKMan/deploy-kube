@@ -87,7 +87,6 @@ data "template_file" "cloud_config_ubuntu_worker" {
     docker_version     = "${var.kubernetes["docker_version"]}"
     kubernetes_version = "${var.kubernetes["kube_version"]}"
     flannel_version    = "${var.kubernetes["flannel_version"]}"
-    instance_group     = "on-demand"
 
     service_ip         = "${var.kubernetes["service_ip"]}"
     service_ip_range   = "${var.kubernetes["service_ip_range"]}"
@@ -96,7 +95,7 @@ data "template_file" "cloud_config_ubuntu_worker" {
     cluster_dns        = "${var.kubernetes["cluster_dns"]}"
     cluster_domain     = "${var.kubernetes["cluster_domain"]}"
 
-    api_server_secure_port    = "${var.kubernetes["api_server_secure_port"]}"
+    api_server_secure_port = "${var.kubernetes["api_server_secure_port"]}"
     api_server_insecure_port = "${var.kubernetes["api_server_insecure_port"]}"
     etcd_endpoints     = "http://${aws_elb.etcd_elb.dns_name}:2379"
     kubernetes_api_elb = "${aws_elb.kubernetes_api_elb.dns_name}"
@@ -108,6 +107,8 @@ data "template_file" "cloud_config_ubuntu_worker" {
     aws_region         = "${var.aws_region}"
     url_admiral        = "${var.dns_urls["url_admiral"]}"
     dns_domain_public  = "${var.dns_domain_public}"
+
+    instance_group     = "primary-worker"
   }
 }
 

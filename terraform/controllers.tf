@@ -64,6 +64,9 @@ data "template_file" "cloud_config_ubuntu_controller" {
     api_server_insecure_port = "${var.kubernetes["api_server_insecure_port"]}"
     etcd_endpoints     = "http://${aws_elb.etcd_elb.dns_name}:2379"
 
+    kubernetes_api_elb = "${aws_elb.kubernetes_api_elb.dns_name}"
+    kubernetes_api_elb_internal = "${aws_elb.kubernetes_api_elb_internal.dns_name}"
+
     apiserver_runtime  = "${var.kubernetes["apiserver_runtime"]}"
     authorization_mode = "${var.kubernetes["authorization_mode"]}"
     admission_control  = "${var.kubernetes["admission_control"]}"
@@ -77,10 +80,7 @@ data "template_file" "cloud_config_ubuntu_controller" {
     NODE_FQDN          = "${replace("%{NODE_FQDN}", "%", "$")}"
     NODE_IP            = "${replace("%{NODE_IP}", "%", "$")}"
 
-    #elb_name           = "${aws_elb.kubernetes_api_elb.dns_name}"
-    #kubernetes_api_elb = "${aws_elb.kubernetes_api_elb_internal.dns_name}"
-
-    #instance_group     = "on-demand"
+    instance_group     = "controllers"
   }
 }
 

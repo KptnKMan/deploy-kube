@@ -58,31 +58,34 @@ instances = {
 }
 
 kubernetes {
+  // do not change these after cluster build
   // Docker_Version Notes: kube 1.7+ to support docker 1.12.x, kube 1.8+ to support 1.13.x
-  // https://github.com/kubernetes/kubernetes/blob/release-1.6/test/e2e_node/jenkins/image-config.yaml
-  docker_version        = "18.03.0"  # 17.03.0 # 17.03.1 # 17.03.2 # 17.06.0 # 17.06.1 # 17.06.2
+  // https://github.com/kubernetes/kubernetes/blob/release-1.10/test/e2e_node/jenkins/image-config.yaml
+  docker_version        = "18.03.0" # 17.03.0 # 17.03.1 # 17.03.2 # 17.06.0 # 17.06.1 # 17.06.2
                                     # 17.09.0 # 17.09.1 # 17.12.0 # 17.12.1
                                     # 18.03.0 # 18.03.1 # 18.06.0
-  // Kube_Version Notes: if using 1.5-1.7 (Not 1.8+) be sure to disable "fail-swap-on" in kubelet (or disable swap)!
   kube_version          = "1.10.6" # 1.9.10 # 1.10.6 # 1.11.1
   flannel_version       = "0.10.0" # 0.5.5 # 0.6.2 # 0.7.1 # 0.8.0 # 0.9.1 # 0.10.0
   
+  // do not change these after cluster build
   // ETCD version used for ETCDCTL installation
   etcd_version          = "3.2.24" # "3.2.20" # "3.2.24" # v3.3.9"
 
+  // do not change these after cluster build
   // supported API runtimes of api-server on master/controller - keep on 1 line
   apiserver_runtime     = "api/all=true" # "api/all=false,api/v1=true" # "extensions/v1beta1=true,extensions/v1beta1/networkpolicies=true,extensions/v1beta1/deployments=true,extensions/v1beta1/daemonsets=true,extensions/v1beta1/thirdpartyresources=true,batch/v2alpha1=true"
   authorization_mode    = "Node,RBAC,AlwaysAllow" #--authorization-mode=Node,RBAC,AlwaysAllow
   admission_control     = "AlwaysAdmit,NamespaceLifecycle,LimitRanger,ServiceAccount,ResourceQuota" #--admission-control=NamespaceLifecycle,LimitRanger,ServiceAccount,ResourceQuota
 
   // do not change these after cluster build
+  // core parameters for Kubernetes networking
   flannel_network       = "10.200.0.0/16" # aka cluster-cidr / pod-network
   service_ip_range      = "10.5.0.0/24" # aka service-cluster-ip-range / service-network
   service_ip            = "10.5.0.1" # aka MASTER_CLUSTER_IP
   cluster_dns           = "10.5.0.10" # DNS server inside cluster (kube-dns)
   cluster_domain        = "kubernetes.local" # cluster domain
-  api_server_secure_port   = "6443"
-  api_server_insecure_port = "8080"
+  api_server_secure_port   = "6443" # Controllers API Server http port
+  api_server_insecure_port = "8080" # Controllers API Server https port
 
   // Kubernetes deployment variables
   namespace_public      = "kube-public" # default PUBLIC namespace that all services are deployed into
@@ -90,9 +93,11 @@ kubernetes {
   public_elb            = "google.com" # change this to the address of your kube-ingress-aws ELB/ALB dns-address
 
   // Public facing ports for the default ingress
-  ingress_port_http     = "32004" # "80"
-  ingress_port_https    = "32005" # "443"
-  ingress_cidr_public   = "0.0.0.0/0"
+  ingress_port_http     = "32004" # port that cluster services expose, must be between 30000-32767
+  ingress_port_https    = "32005" # port that cluster services expose, must be between 30000-32767
+  public_elb_port_http  = "80" # port public ELB exposes to internet
+  public_elb_port_https = "443" # port public ELB exposes to internet
+  public_elb_cidr       = "0.0.0.0/0" # IP range public ELB exposes to internet
 
   // Extra management IP - Leave blank or add full CIDR here (Eg: 1.1.1.1/1,2.2.2.2/2 comma separated, no spaces)
   ingress_extra_ip      = "0.0.0.0/0" # <-- REMOVE, management IPs should be added to root template
@@ -100,15 +105,13 @@ kubernetes {
   letsencrypt_secret    = "deez-certs"
 }
 
-// Tags to apply to cluster resources
+// Common Tags for all resources in deployment
 cluster_tags = {
-  Env                   = "Kareem POC Deployment"
-  Role                  = "Kareem POC Deployment"
-  Owner                 = "Kareem Operations"
-  Team                  = "Kareem Operations"
-  Project-Budget        = "kareem-project-code"
-  ScheduleInfo          = "StopToday"
-  MonitoringInfo        = "1"
+  Role                  = "Dev"
+  Service               = "Base Infrastructure"
+  Business-Unit         = "INFRE"
+  Owner                 = "OpsEng"
+  Purpose               = "Kubernetes Cluster"
 }
 
 // EFS storage for cluster backups and usage
