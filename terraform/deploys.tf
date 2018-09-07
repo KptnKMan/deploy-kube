@@ -79,30 +79,34 @@ data "template_file" "deploy_demo_letsencrypt" {
     namespace_public   = "${var.kubernetes["namespace_public"]}"
     namespace_private  = "${var.kubernetes["namespace_private"]}"
 
-    domain               = "${var.dns_domain_public}"
-    url_letsencrypt      = "${var.dns_urls["url_letsencrypt"]}"
-    letsencrypt_email    = "${var.kubernetes["letsencrypt_email"]}"
-    letsencrypt_secret   = "${var.kubernetes["letsencrypt_secret"]}"
+    ingress_port_http  = "${var.kubernetes["ingress_port_http"]}"
+    ingress_port_https = "${var.kubernetes["ingress_port_https"]}"
+
+    domain             = "${var.dns_domain_public}"
+    url_letsencrypt    = "${var.dns_urls["url_letsencrypt"]}"
+    letsencrypt_email  = "${var.kubernetes["letsencrypt_email"]}"
+    letsencrypt_secret = "${var.kubernetes["letsencrypt_secret"]}"
 
     cluster_name_short = "${var.cluster_name_short}"
     cluster_config_location = "${var.cluster_config_location}"
   }
 }
 
-resource "null_resource" "deploys" {
+resource "null_resource" "render_deploys" {
   triggers  = {
     // Any change to UUID (every apply) triggers re-provisioning
     # filename = "test-${uuid()}"
     // Any change to deploy templates triggers regeneration
-    filename = "terraform/templates/deploy_kubedns.yaml"
-    filename = "terraform/templates/deploy_dashboard.yaml"
-    filename = "terraform/templates/deploy_demo_nginx.yaml"
-    filename = "terraform/templates/deploy_demo_ingress.yaml"
-    filename = "terraform/templates/deploy_demo_ingress_aws.yaml"
+    policy_sha1 = "${sha1(file("terraform/templates/deploy_kubedns.yaml"))}"
+    policy_sha1 = "${sha1(file("terraform/templates/deploy_dashboard.yaml"))}"
+    policy_sha1 = "${sha1(file("terraform/templates/deploy_demo_nginx.yaml"))}"
+    policy_sha1 = "${sha1(file("terraform/templates/deploy_demo_ingress.yaml"))}"
+    policy_sha1 = "${sha1(file("terraform/templates/deploy_demo_ingress_aws.yaml"))}"
+    policy_sha1 = "${sha1(file("terraform/templates/deploy_demo_letsencrypt.yaml"))}"
   }
   // Create dir for certs
   provisioner "local-exec" { command = "mkdir -p deploys" }
-  // Generate deploy_kubedns.yaml and deploy_dashboard.yaml templates to file
+  // Render deploy templates to file
   provisioner "local-exec" { command = "cat > deploys/deploy_kubedns.yaml <<EOL\n${data.template_file.deploy_kubedns.rendered}\nEOL" }
   provisioner "local-exec" { command = "cat > deploys/deploy_dashboard.yaml <<EOL\n${data.template_file.deploy_dashboard.rendered}\nEOL" }
   provisioner "local-exec" { command = "cat > deploys/deploy_demo_nginx.yaml <<EOL\n${data.template_file.deploy_demo_nginx.rendered}\nEOL" }

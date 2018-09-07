@@ -19,7 +19,7 @@ resource "null_resource" "kubeconfig_admin" {
     // Any change to UUID (every apply) triggers re-provisioning
     # filename = "test-${uuid()}"
     // Any change to kubeconfig file triggers
-    filename = "config/kubeconfig"
+    policy_sha1 = "${sha1(file("config/kubeconfig"))}"
     #filename = "config/ssl/_ssl_config.marker"
     // uuid of api_elb
     #"uuid()" = "${aws_elb.kubernetes_api_elb.id}"
@@ -211,7 +211,7 @@ resource "tls_self_signed_cert" "root_ca" {
     "kubernetes",
     "kubernetes.default",
     "kubernetes.default.svc",
-    "kubernetes.default.svc.cluster.local",
+    "kubernetes.default.svc.${var.kubernetes["cluster_domain"]}",
     "${var.dns_urls["url_admiral"]}.${var.dns_domain_public}",
     "${aws_elb.kubernetes_api_elb.dns_name}",
     "${aws_elb.kubernetes_api_elb_internal.dns_name}",
@@ -248,7 +248,7 @@ resource "tls_cert_request" "api_server_key" {
     "kubernetes",
     "kubernetes.default",
     "kubernetes.default.svc",
-    "kubernetes.default.svc.cluster.local",
+    "kubernetes.default.svc.${var.kubernetes["cluster_domain"]}",
     "${var.dns_urls["url_admiral"]}.${var.dns_domain_public}",
     "${aws_elb.kubernetes_api_elb.dns_name}",
     "${aws_elb.kubernetes_api_elb_internal.dns_name}",
@@ -327,7 +327,7 @@ resource "tls_cert_request" "admin_key" {
     "kubernetes",
     "kubernetes.default",
     "kubernetes.default.svc",
-    "kubernetes.default.svc.cluster.local",
+    "kubernetes.default.svc.${var.kubernetes["cluster_domain"]}",
     "${var.dns_urls["url_admiral"]}.${var.dns_domain_public}",
     "${aws_elb.kubernetes_api_elb.dns_name}",
     "${aws_elb.kubernetes_api_elb_internal.dns_name}",
@@ -397,7 +397,7 @@ resource "tls_cert_request" "worker_key" {
     "kubernetes",
     "kubernetes.default",
     "kubernetes.default.svc",
-    "kubernetes.default.svc.cluster.local",
+    "kubernetes.default.svc.${var.kubernetes["cluster_domain"]}",
     "${var.dns_urls["url_admiral"]}.${var.dns_domain_public}",
     "${aws_elb.kubernetes_api_elb.dns_name}",
     "${aws_elb.kubernetes_api_elb_internal.dns_name}",
