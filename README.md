@@ -1,7 +1,7 @@
 # Kareems New Kubernetes
 
 This repository contains Kareems New Kubernetes Deployment configuration.
-It's designed to use outputs from and be built on top of the base Terraform [Base VPC and Bastion Deployment template](https://github.com/KptnKMan/deploy-vpc-aws).
+It's designed to use outputs from and be built on top of the Terraform [Base VPC and Bastion Template](https://github.com/KptnKMan/deploy-vpc-aws).
 This is designed to bring up a cluster in AWS (Amazon Web Services) that is empty and ready to manipulate.
 This is intended to eventually reflect production-ready implementation.
 Currently it is in testing, and may not work.
@@ -16,7 +16,7 @@ It contains:
 
 Additional documentation for setup can be found in [docs](docs), when they become available.
 
-Best to start at the [setup doc](https://github.com/KptnKMan/deploy-vpc-aws/docs/setup.md) to setup an environment.
+Best to start at the [base vpc template setup doc](https://github.com/KptnKMan/deploy-vpc-aws/blob/master/docs/setup.md) to setup an environment.
 
 ## Basic Requirements
 
@@ -75,12 +75,12 @@ Versions tested:
 
 * kubectl: 1.10.6 In testing: 1.11.x
 * terraform: 0.8.8 upto 0.11.7
-* ansible-playbook: 2.2.1.0, 2.4.1.0
+* ~~ansible-playbook: 2.2.1.0, 2.4.1.0~~
 
 Terraform Inputs:
 
 * This template will accept and require a number of outputs from the base template.
-* You will want to deploy the [base template](https://github.com/KptnKMan/deploy-vpc-aws) first.
+* You will want to deploy the [base vpc template](https://github.com/KptnKMan/deploy-vpc-aws) first.
 
 ## Todos & Known issues
 
