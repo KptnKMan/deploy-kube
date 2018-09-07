@@ -86,7 +86,7 @@ resource "aws_security_group" "worker_sg" {
 
 // Cloud Config file for worker nodes
 data "template_file" "cloud_config_ubuntu_worker" {
-  template = "${file("terraform/templates/cloud_config_ubuntu_worker.yml")}"
+  template = "${file("terraform/templates/cloud_config_ubuntu_worker.yaml")}"
 
   vars {
     docker_version     = "${var.kubernetes["docker_version"]}"

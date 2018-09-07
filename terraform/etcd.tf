@@ -55,7 +55,7 @@ resource "aws_security_group" "etcd_sg" {
 
 // Cloud config file template for etcd
 data "template_file" "cloud_config_ubuntu_etcd" {
-  template = "${file("terraform/templates/cloud_config_ubuntu_etcd.yml")}"
+  template = "${file("terraform/templates/cloud_config_ubuntu_etcd.yaml")}"
 
   vars {
     etcd_backup_bucket = "${aws_s3_bucket.backup_bucket.id}"

@@ -19,7 +19,7 @@ resource "null_resource" "kubeconfig_admin" {
     // Any change to UUID (every apply) triggers re-provisioning
     # filename = "test-${uuid()}"
     // Any change to kubeconfig file triggers
-    policy_sha1 = "${sha1(file("config/kubeconfig"))}"
+    policy_sha1 = "${sha1(file("terraform/templates/kubeconfig_generic.template"))}"
     #filename = "config/ssl/_ssl_config.marker"
     // uuid of api_elb
     #"uuid()" = "${aws_elb.kubernetes_api_elb.id}"

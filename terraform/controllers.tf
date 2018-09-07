@@ -50,7 +50,7 @@ resource "aws_security_group" "controller_sg" {
 
 // Cloud Config file to configure controller
 data "template_file" "cloud_config_ubuntu_controller" {
-  template = "${file("terraform/templates/cloud_config_ubuntu_controller.yml")}"
+  template = "${file("terraform/templates/cloud_config_ubuntu_controller.yaml")}"
 
   vars {
     docker_version     = "${var.kubernetes["docker_version"]}"
