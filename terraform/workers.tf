@@ -21,8 +21,7 @@ resource "aws_security_group" "worker_sg" {
     protocol  = "tcp"
     cidr_blocks = [
       "${split(",", data.terraform_remote_state.vpc.management_ips)}",
-      "${split(",", data.terraform_remote_state.vpc.management_ips_personal)}",
-      "${var.kubernetes["ingress_extra_ip"]}"
+      "${split(",", data.terraform_remote_state.vpc.management_ips_personal)}"
     ]
   }
 
@@ -161,6 +160,7 @@ resource "aws_cloudformation_stack" "worker_group" {
       "Properties": {
         "VPCZoneIdentifier": ["${join(",", data.terraform_remote_state.vpc.vpc_subnets_public)}"],
         "LaunchConfigurationName": "${aws_launch_configuration.worker_configuration.name}",
+        "LoadBalancerNames": ["${aws_elb.kubernetes_public_elb.name}"],
         "MinSize": "${var.instances["worker_min"]}",
         "MaxSize": "${var.instances["worker_max"]}",
         "TerminationPolicies": ["OldestLaunchConfiguration", "OldestInstance"],

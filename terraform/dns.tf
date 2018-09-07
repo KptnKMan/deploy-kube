@@ -3,6 +3,20 @@
 
 // Primary www
 
+resource "aws_route53_record" "public" {
+  zone_id = "${data.terraform_remote_state.vpc.route53_zone_id}"
+  name    = "${var.dns_urls["url_public"]}"
+  type    = "CNAME"
+  ttl     = "5"
+
+  weighted_routing_policy {
+    weight = 10
+  }
+
+  set_identifier = "${var.dns_urls["url_public"]}"
+  records        = ["${aws_elb.kubernetes_public_elb.dns_name}"]
+}
+
 // PROD URLs
 
 // ACC URLs
