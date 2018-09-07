@@ -24,7 +24,7 @@ dns_domain_public       = "bifromedia.com"
 
 // URL prefixes for cluster components
 dns_urls = {
-  url_public            = "kareempoc" # primary public alias
+  url_public            = "*" # "kareempoc" # primary public alias
   url_admiral           = "kareempoc-admiral" # API server alias
   url_etcd              = "kareempoc-etcd" # ETCD cluster alias
   url_letsencrypt       = "kareempoc-sslmebaby" # for LetsEncrypt
@@ -95,8 +95,8 @@ kubernetes {
   ingress_cidr_public   = "0.0.0.0/0"
 
   // Extra management IP - Leave blank or add full CIDR here (Eg: 1.1.1.1/1,2.2.2.2/2 comma separated, no spaces)
-  ingress_extra_ip      = "0.0.0.0/0"
-  letsencrypt_email     = "my.email@gmail.com"
+  ingress_extra_ip      = "0.0.0.0/0" # <-- REMOVE, management IPs should be added to root template
+  letsencrypt_email     = "kareem.straker@gmail.com"
   letsencrypt_secret    = "deez-certs"
 }
 
