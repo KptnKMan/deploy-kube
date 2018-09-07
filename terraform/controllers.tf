@@ -1,7 +1,7 @@
 // Security Group for controllers
 resource "aws_security_group" "controller_sg" {
-  name        = "${var.cluster_name_short}-sg-controller"
-  description = "controller machines"
+  name        = "${var.cluster_name_short}-sg-controllers"
+  description = "cluster ${var.cluster_name_short} Controller traffic"
   vpc_id      = "${data.terraform_remote_state.vpc.vpc_id}"
 
   lifecycle {
@@ -35,17 +35,12 @@ resource "aws_security_group" "controller_sg" {
     security_groups = ["${data.terraform_remote_state.vpc.common_sg_id}"]
   }
 
-  tags {
-    Name               = "${var.cluster_name_short}-sg-controllers"
-    Terraform          = "${var.cluster_tags["Terraform"]}"
-    Env                = "${var.cluster_tags["Env"]}"
-    Role               = "${var.cluster_tags["Role"]}"
-    Owner              = "${var.cluster_tags["Owner"]}"
-    Team               = "${var.cluster_tags["Team"]}"
-    Project-Budget     = "${var.cluster_tags["Project-Budget"]}"
-    ScheduleInfo       = "${var.cluster_tags["ScheduleInfo"]}"
-    MonitoringInfo     = "${var.cluster_tags["MonitoringInfo"]}"
-  }
+  tags = "${merge(
+    local.aws_tags,
+    map(
+      "Name", "${var.cluster_name_short}-sg-controllers"
+    )
+  )}"
 }
 
 // Cloud Config file to configure controller
@@ -165,8 +160,8 @@ EOF
 
 // Security Group for API Controller ELB
 resource "aws_security_group" "kubernetes_controllers_elb_sg" {
-  name        = "${var.cluster_name_short}-kubernetes-controllers-elb"
-  description = "Traffic from ELB to Kubernetes controllers"
+  name        = "${var.cluster_name_short}-sg-elb-api"
+  description = "cluster ${var.cluster_name_short} traffic from API ELB to API controllers"
   vpc_id      = "${data.terraform_remote_state.vpc.vpc_id}"
 
   # Allow access to controller from management ips and cluster itself
@@ -189,22 +184,17 @@ resource "aws_security_group" "kubernetes_controllers_elb_sg" {
     ]
   }
 
-  tags {
-    Name               = "${var.cluster_name_short}-sg-kubernetes-elb"
-    Terraform          = "${var.cluster_tags["Terraform"]}"
-    Env                = "${var.cluster_tags["Env"]}"
-    Role               = "${var.cluster_tags["Role"]}"
-    Owner              = "${var.cluster_tags["Owner"]}"
-    Team               = "${var.cluster_tags["Team"]}"
-    Project-Budget     = "${var.cluster_tags["Project-Budget"]}"
-    ScheduleInfo       = "${var.cluster_tags["ScheduleInfo"]}"
-    MonitoringInfo     = "${var.cluster_tags["MonitoringInfo"]}"
-  }
+  tags = "${merge(
+    local.aws_tags,
+    map(
+      "Name", "${var.cluster_name_short}-sg-elb-api"
+    )
+  )}"
 }
 
 // Loadbalancer for controllers
 resource "aws_elb" "kubernetes_api_elb" {
-  name = "${var.cluster_name_short}-k8s-admiral"
+  name = "${var.cluster_name_short}-elb-api-public"
 
   subnets = ["${data.terraform_remote_state.vpc.vpc_subnets_public}"]
 
@@ -225,9 +215,12 @@ resource "aws_elb" "kubernetes_api_elb" {
     interval            = 10
   }
 
-  tags {
-    Terraform          = "${var.cluster_tags["Terraform"]}"
-  }
+  tags = "${merge(
+    local.aws_tags,
+    map(
+      "Name", "${var.cluster_name_short}-elb-api-public"
+    )
+  )}"
 
   cross_zone_load_balancing = true
   security_groups           = ["${data.terraform_remote_state.vpc.common_sg_id}", "${aws_security_group.kubernetes_controllers_elb_sg.id}"]
@@ -235,7 +228,7 @@ resource "aws_elb" "kubernetes_api_elb" {
 
 // Internal loadbalancer for controllers
 resource "aws_elb" "kubernetes_api_elb_internal" {
-  name = "${var.cluster_name_short}-internal-k8s-admiral"
+  name = "${var.cluster_name_short}-elb-api-internal"
 
   subnets = ["${data.terraform_remote_state.vpc.vpc_subnets_public}"]
 
@@ -256,9 +249,12 @@ resource "aws_elb" "kubernetes_api_elb_internal" {
     interval            = 10
   }
 
-  tags {
-    Terraform          = "${var.cluster_tags["Terraform"]}"
-  }
+  tags = "${merge(
+    local.aws_tags,
+    map(
+      "Name", "${var.cluster_name_short}-elb-api-internal"
+    )
+  )}"
 
   internal                  = true
   cross_zone_load_balancing = true

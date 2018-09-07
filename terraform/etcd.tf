@@ -1,7 +1,7 @@
 // Security Group for the etcd servers
 resource "aws_security_group" "etcd_sg" {
   name        = "${var.cluster_name_short}-sg-etcd"
-  description = "ETCD traffic"
+  description = "cluster ${var.cluster_name_short} ETCD traffic"
   vpc_id      = "${data.terraform_remote_state.vpc.vpc_id}"
 
   // Allow ETCD traffic from kubernetes and bastion groups
@@ -40,17 +40,12 @@ resource "aws_security_group" "etcd_sg" {
     security_groups = ["${data.terraform_remote_state.vpc.common_sg_id}"]
   }
 
-  tags {
-    Name               = "${var.cluster_name_short}-sg-etcd"
-    Terraform          = "${var.cluster_tags["Terraform"]}"
-    Env                = "${var.cluster_tags["Env"]}"
-    Role               = "${var.cluster_tags["Role"]}"
-    Owner              = "${var.cluster_tags["Owner"]}"
-    Team               = "${var.cluster_tags["Team"]}"
-    Project-Budget     = "${var.cluster_tags["Project-Budget"]}"
-    ScheduleInfo       = "${var.cluster_tags["ScheduleInfo"]}"
-    MonitoringInfo     = "${var.cluster_tags["MonitoringInfo"]}"
-  }
+  tags = "${merge(
+    local.aws_tags,
+    map(
+      "Name", "${var.cluster_name_short}-sg-etcd"
+    )
+  )}"
 }
 
 // Cloud config file template for etcd
@@ -161,7 +156,7 @@ EOF
 
 // Internal loadbalancer used for initial ETCD cluster lookup
 resource "aws_elb" "etcd_elb" {
-  name     = "${var.cluster_name_short}-elb-etcd"
+  name     = "${var.cluster_name_short}-elb-etcd-internal"
 
   subnets  = ["${data.terraform_remote_state.vpc.vpc_subnets_private}"]
   
@@ -208,17 +203,12 @@ resource "aws_elb" "etcd_elb" {
   cross_zone_load_balancing = true
   security_groups           = ["${data.terraform_remote_state.vpc.common_sg_id}","${aws_security_group.etcd_sg.id}"]
 
-  tags {
-    Name               = "${var.cluster_name_short}-elb-etcd-public"
-    Terraform          = "${var.cluster_tags["Terraform"]}"
-    Env                = "${var.cluster_tags["Env"]}"
-    Role               = "${var.cluster_tags["Role"]}"
-    Owner              = "${var.cluster_tags["Owner"]}"
-    Team               = "${var.cluster_tags["Team"]}"
-    Project-Budget     = "${var.cluster_tags["Project-Budget"]}"
-    ScheduleInfo       = "${var.cluster_tags["ScheduleInfo"]}"
-    MonitoringInfo     = "${var.cluster_tags["MonitoringInfo"]}"
-  }
+  tags = "${merge(
+    local.aws_tags,
+    map(
+      "Name", "${var.cluster_name_short}-elb-etcd-internal"
+    )
+  )}"
 }
 
 // Outputs

@@ -1,7 +1,7 @@
 // Security Group for Worker Nodes
 resource "aws_security_group" "worker_sg" {
-  name        = "${var.cluster_name_short}-sg-worker"
-  description = "Worker traffic"
+  name        = "${var.cluster_name_short}-sg-workers"
+  description = "cluster ${var.cluster_name_short} Worker traffic"
   vpc_id      = "${data.terraform_remote_state.vpc.vpc_id}"
 
   // Allow external application access (This is default port range)
@@ -61,17 +61,12 @@ resource "aws_security_group" "worker_sg" {
     security_groups = ["${data.terraform_remote_state.vpc.common_sg_id}"]
   }
 
-  tags {
-    Name               = "${var.cluster_name_short}-sg-worker"
-    Terraform          = "${var.cluster_tags["Terraform"]}"
-    Env                = "${var.cluster_tags["Env"]}"
-    Role               = "${var.cluster_tags["Role"]}"
-    Owner              = "${var.cluster_tags["Owner"]}"
-    Team               = "${var.cluster_tags["Team"]}"
-    Project-Budget     = "${var.cluster_tags["Project-Budget"]}"
-    ScheduleInfo       = "${var.cluster_tags["ScheduleInfo"]}"
-    MonitoringInfo     = "${var.cluster_tags["MonitoringInfo"]}"
-  }
+  tags = "${merge(
+    local.aws_tags,
+    map(
+      "Name", "${var.cluster_name_short}-sg-workers"
+    )
+  )}"
 }
 
 // THIS IS USED FOR PUBLIC ACCESS TO HTTPS PORTS FOR ALL WORKERS
