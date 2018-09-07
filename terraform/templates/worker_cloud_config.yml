@@ -33,8 +33,8 @@ write_files:
 
       ExecStart=/usr/bin/dockerd \
         --storage-driver=overlay \
-        --iptables=false \
-        --ip-masq=false \
+        --iptables=true \
+        --ip-masq=true \
         --bridge=docker0 \
         --exec-root=/var/run/docker-bootstrap \
         --data-root=/var/lib/docker-bootstrap \
@@ -72,7 +72,7 @@ write_files:
         --name=flannel \
         --volume=/dev/net:/dev/net \
         quay.io/coreos/flannel:v${flannel_version} \
-        --ip-masq=false \
+        --ip-masq=true \
         --etcd-endpoints=${etcd_endpoints}
 
       ExecStartPost=/bin/bash -c "/bin/sleep 20 && /usr/bin/docker -H unix:///var/run/docker-bootstrap.sock exec flannel cat /run/flannel/subnet.env > /etc/flannel.env"
@@ -104,8 +104,8 @@ write_files:
 
       ExecStart=/usr/bin/dockerd \
         --storage-driver=overlay \
-        --iptables=false \
-        --ip-masq=false \
+        --iptables=true \
+        --ip-masq=true \
         --bip=$${FLANNEL_SUBNET} \
         --mtu=$${FLANNEL_MTU} \
         --exec-root=/var/run/docker \
@@ -218,7 +218,7 @@ write_files:
       healthzBindAddress: 0.0.0.0:10256
       hostnameOverride: ""
       iptables:
-        masqueradeAll: false
+        masqueradeAll: true
         masqueradeBit: 14
         minSyncPeriod: 0s
         syncPeriod: 30s
@@ -286,7 +286,7 @@ write_files:
       DNS.2 = kubernetes
       DNS.3 = kubernetes.default
       DNS.4 = kubernetes.default.svc
-      DNS.5 = kubernetes.default.svc.cluster.local
+      DNS.5 = kubernetes.default.svc.${cluster_domain}
       DNS.6 = ${url_admiral}.${dns_domain_public}
       DNS.7 = *.${dns_domain_public}
       DNS.8 = *.${aws_region}.compute.internal

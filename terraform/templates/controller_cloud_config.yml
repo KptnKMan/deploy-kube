@@ -20,7 +20,7 @@ write_files:
 
       ExecStart=/usr/bin/flanneld \
         --etcd-endpoints=${etcd_endpoints} \
-        --ip-masq=false
+        --ip-masq=true
 
       ExecStartPost=/bin/bash -c "/bin/sleep 20 && cat /run/flannel/subnet.env > /etc/flannel.env"
 
@@ -45,8 +45,8 @@ write_files:
 
       ExecStart=/usr/bin/dockerd \
         --storage-driver=overlay \
-        --iptables=false \
-        --ip-masq=false \
+        --iptables=true \
+        --ip-masq=true \
         --bip=$${FLANNEL_SUBNET} \
         --mtu=$${FLANNEL_MTU}
 
@@ -196,7 +196,7 @@ write_files:
       healthzBindAddress: {{NODE_IP}}:10256
       hostnameOverride: ""
       iptables:
-        masqueradeAll: false
+        masqueradeAll: true
         masqueradeBit: 14
         minSyncPeriod: 0s
         syncPeriod: 30s
