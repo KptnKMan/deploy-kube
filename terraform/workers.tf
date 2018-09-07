@@ -86,8 +86,8 @@ resource "aws_security_group" "worker_sg" {
 #}
 
 // Cloud Config file for worker nodes
-data "template_file" "worker_cloud_config" {
-  template = "${file("terraform/templates/worker_cloud_config.yml")}"
+data "template_file" "cloud_config_ubuntu_worker" {
+  template = "${file("terraform/templates/cloud_config_ubuntu_worker.yml")}"
 
   vars {
     docker_version     = "${var.kubernetes["docker_version"]}"
@@ -129,7 +129,7 @@ resource "aws_launch_configuration" "worker_configuration" {
 
   key_name             = "${data.terraform_remote_state.vpc.key_pair_name}"
 
-  user_data            = "${data.template_file.worker_cloud_config.rendered}"
+  user_data            = "${data.template_file.cloud_config_ubuntu_worker.rendered}"
   security_groups      = ["${data.terraform_remote_state.vpc.common_sg_id}", "${aws_security_group.worker_sg.id}"]
 
   associate_public_ip_address = false

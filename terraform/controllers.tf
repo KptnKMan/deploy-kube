@@ -49,8 +49,8 @@ resource "aws_security_group" "controller_sg" {
 }
 
 // Cloud Config file to configure controller
-data "template_file" "controller_cloud_config" {
-  template = "${file("terraform/templates/controller_cloud_config.yml")}"
+data "template_file" "cloud_config_ubuntu_controller" {
+  template = "${file("terraform/templates/cloud_config_ubuntu_controller.yml")}"
 
   vars {
     docker_version     = "${var.kubernetes["docker_version"]}"
@@ -101,7 +101,7 @@ resource "aws_launch_configuration" "controller_configuration" {
 
   key_name             = "${data.terraform_remote_state.vpc.key_pair_name}"
 
-  user_data            = "${data.template_file.controller_cloud_config.rendered}"
+  user_data            = "${data.template_file.cloud_config_ubuntu_controller.rendered}"
   security_groups      = ["${data.terraform_remote_state.vpc.common_sg_id}", "${aws_security_group.controller_sg.id}"]
 
   associate_public_ip_address = false
