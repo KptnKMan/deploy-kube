@@ -16,7 +16,7 @@ It contains:
 
 Additional documentation for setup can be found in [docs](docs), when they become available.
 
-Best to start at the [Setup doc](https://github.com/KptnKMan/deploy-vpc-aws/docs/setup.md) to setup an environment.
+Best to start at the [setup doc](https://github.com/KptnKMan/deploy-vpc-aws/docs/setup.md) to setup an environment.
 
 ## Basic Requirements
 
