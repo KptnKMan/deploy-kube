@@ -87,7 +87,7 @@ variable "kubernetes" {
     service_ip_range    = "10.4.0.0/24"
     service_ip          = "10.4.0.1"
     cluster_dns         = "10.4.0.10"
-    cluster_domain      = "cluster.local"
+    cluster_domain      = "kubernetes.local"
     api_server_secure_port   = "6443"
     api_server_insecure_port = "8080"
   }

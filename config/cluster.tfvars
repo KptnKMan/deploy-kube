@@ -80,7 +80,7 @@ kubernetes {
   service_ip_range      = "10.5.0.0/24" # aka service-cluster-ip-range / service-network
   service_ip            = "10.5.0.1" # aka MASTER_CLUSTER_IP
   cluster_dns           = "10.5.0.10" # DNS server inside cluster (kube-dns)
-  cluster_domain        = "cluster.local" # cluster domain
+  cluster_domain        = "kubernetes.local" # cluster domain
   api_server_secure_port   = "6443"
   api_server_insecure_port = "8080"
 
@@ -90,8 +90,8 @@ kubernetes {
   public_elb            = "google.com" # change this to the address of your kube-ingress-aws ELB/ALB dns-address
 
   // Public facing ports for the default ingress
-  ingress_port_http     = "80"
-  ingress_port_https    = "443"
+  ingress_port_http     = "32004" # "80"
+  ingress_port_https    = "32005" # "443"
   ingress_cidr_public   = "0.0.0.0/0"
 
   // Extra management IP - Leave blank or add full CIDR here (Eg: 1.1.1.1/1,2.2.2.2/2 comma separated, no spaces)
