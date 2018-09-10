@@ -18,6 +18,7 @@ data:
         add_header Content-Type text/plain; # Prevents download
         return 200 "Hello world! Kubernetes + Let's encrypt demo.";
       }
+    }
 
 # ---
 # # ------------------- nginx ConfigMap v2 ------------------- #

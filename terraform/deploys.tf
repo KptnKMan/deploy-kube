@@ -24,6 +24,23 @@ data "template_file" "deploy_dashboard" {
   }
 }
 
+// Kube EFS Storage Claim config
+data "template_file" "deploy_efs_storageclaim" {
+  template = "${file("terraform/templates/deploy_efs_storageclaim.yaml")}"
+
+  vars {
+    aws_region         = "${data.terraform_remote_state.vpc.vpc_region}"
+    kube_efs_id        = "${aws_efs_file_system.kube_efs.id}"
+    kube_efs_dns       = "${aws_efs_file_system.kube_efs.dns_name}"
+
+    cluster_dns        = "${var.kubernetes["cluster_dns"]}"
+    cluster_domain     = "${var.kubernetes["cluster_domain"]}"
+
+    cluster_name_short = "${var.cluster_name_short}"
+    cluster_config_location = "${var.cluster_config_location}"
+  }
+}
+
 // Demo Deployment+Service Nginx
 data "template_file" "deploy_demo_nginx" {
   template = "${file("terraform/templates/deploy_demo_nginx.yaml")}"
@@ -99,6 +116,7 @@ resource "null_resource" "render_deploys" {
     // Any change to deploy templates triggers regeneration
     policy_sha1 = "${sha1(file("terraform/templates/deploy_kubedns.yaml"))}"
     policy_sha1 = "${sha1(file("terraform/templates/deploy_dashboard.yaml"))}"
+    policy_sha1 = "${sha1(file("terraform/templates/deploy_efs_storageclaim.yaml"))}"
     policy_sha1 = "${sha1(file("terraform/templates/deploy_demo_nginx.yaml"))}"
     policy_sha1 = "${sha1(file("terraform/templates/deploy_demo_ingress.yaml"))}"
     policy_sha1 = "${sha1(file("terraform/templates/deploy_demo_ingress_aws.yaml"))}"
@@ -109,6 +127,7 @@ resource "null_resource" "render_deploys" {
   // Render deploy templates to file
   provisioner "local-exec" { command = "cat > deploys/deploy_kubedns.yaml <<EOL\n${data.template_file.deploy_kubedns.rendered}\nEOL" }
   provisioner "local-exec" { command = "cat > deploys/deploy_dashboard.yaml <<EOL\n${data.template_file.deploy_dashboard.rendered}\nEOL" }
+  provisioner "local-exec" { command = "cat > deploys/deploy_efs_storageclaim.yaml <<EOL\n${data.template_file.deploy_efs_storageclaim.rendered}\nEOL" }
   provisioner "local-exec" { command = "cat > deploys/deploy_demo_nginx.yaml <<EOL\n${data.template_file.deploy_demo_nginx.rendered}\nEOL" }
   provisioner "local-exec" { command = "cat > deploys/deploy_demo_ingress.yaml <<EOL\n${data.template_file.deploy_demo_ingress.rendered}\nEOL" }
   provisioner "local-exec" { command = "cat > deploys/deploy_demo_ingress_aws.yaml <<EOL\n${data.template_file.deploy_demo_ingress_aws.rendered}\nEOL" }
@@ -125,9 +144,13 @@ output "__post_deploy_config_2nd" {
 }
 
 output "__post_deploy_config_3rd" {
+  value = "deploy kubedns using: kubectl --kubeconfig config/kubeconfig apply -f deploys/deploy_efs_storageclaim.yaml"
+}
+
+output "__post_deploy_config_4th" {
   value = "deploy nginx demo using: kubectl --kubeconfig config/kubeconfig apply -f deploys/deploy_demo_nginx.yaml"
 }
 
-output "__post_deploy_config_4th_ADVANCED" {
+output "__post_deploy_config_5th_ADVANCED" {
   value = "deploy kubedns using: ansible-playbook ../deploy-kube-base/scripts/deploy-base.yaml"
 }
