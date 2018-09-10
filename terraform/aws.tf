@@ -41,16 +41,12 @@ resource "aws_s3_bucket" "backup_bucket" {
     enabled = true
   }
 
-  tags {
-    Terraform          = "${var.cluster_tags["Terraform"]}"
-    Env                = "${var.cluster_tags["Env"]}"
-    Role               = "${var.cluster_tags["Role"]}"
-    Owner              = "${var.cluster_tags["Owner"]}"
-    Team               = "${var.cluster_tags["Team"]}"
-    Project-Budget     = "${var.cluster_tags["Project-Budget"]}"
-    ScheduleInfo       = "${var.cluster_tags["ScheduleInfo"]}"
-    MonitoringInfo     = "${var.cluster_tags["MonitoringInfo"]}"
-  }
+  tags = "${merge(
+    local.aws_tags,
+    map(
+      "Name", "${var.cluster_name_short}-s3-backup"
+    )
+  )}"
 }
 
 // State bucket, available for storing data
@@ -64,14 +60,10 @@ resource "aws_s3_bucket" "state_bucket" {
     enabled = true
   }
 
-  tags {
-    Terraform          = "${var.cluster_tags["Terraform"]}"
-    Env                = "${var.cluster_tags["Env"]}"
-    Role               = "${var.cluster_tags["Role"]}"
-    Owner              = "${var.cluster_tags["Owner"]}"
-    Team               = "${var.cluster_tags["Team"]}"
-    Project-Budget     = "${var.cluster_tags["Project-Budget"]}"
-    ScheduleInfo       = "${var.cluster_tags["ScheduleInfo"]}"
-    MonitoringInfo     = "${var.cluster_tags["MonitoringInfo"]}"
-  }
+  tags = "${merge(
+    local.aws_tags,
+    map(
+      "Name", "${var.cluster_name_short}-s3-state"
+    )
+  )}"
 }

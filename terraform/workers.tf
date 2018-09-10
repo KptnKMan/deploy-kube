@@ -146,7 +146,7 @@ resource "aws_launch_configuration" "worker_configuration" {
 // Define our AutoScaling group using CloudFormation
 resource "aws_cloudformation_stack" "worker_group" {
   depends_on = ["aws_cloudformation_stack.controller_group"]
-  name = "${var.cluster_name_short}-workers"
+  name = "${var.cluster_name_short}-cfnstack-workers"
 
   template_body = <<EOF
 {
@@ -162,7 +162,7 @@ resource "aws_cloudformation_stack" "worker_group" {
         "TerminationPolicies": ["OldestLaunchConfiguration", "OldestInstance"],
         "Tags": [{
           "Key": "Name",
-          "Value": "${var.cluster_name_short}-worker",
+          "Value": "${var.cluster_name_short}-ec2-worker",
           "PropagateAtLaunch": "true"
         },{
           "Key": "kubernetes.io/cluster/${var.cluster_name_short}",
@@ -171,6 +171,30 @@ resource "aws_cloudformation_stack" "worker_group" {
         },{
           "Key": "KubernetesCluster",
           "Value": "${var.cluster_name_short}",
+          "PropagateAtLaunch": "true"
+        },{
+          "Key": "Role",
+          "Value": "${var.cluster_tags["Role"]}",
+          "PropagateAtLaunch": "true"
+        },{
+          "Key": "Service",
+          "Value": "${var.cluster_tags["Service"]}",
+          "PropagateAtLaunch": "true"
+        },{
+          "Key": "Business-Unit",
+          "Value": "${var.cluster_tags["Business-Unit"]}",
+          "PropagateAtLaunch": "true"
+        },{
+          "Key": "Owner",
+          "Value": "${var.cluster_tags["Owner"]}",
+          "PropagateAtLaunch": "true"
+        },{
+          "Key": "Purpose",
+          "Value": "${var.cluster_tags["Purpose"]}",
+          "PropagateAtLaunch": "true"
+        },{
+          "Key": "Terraform",
+          "Value": "True",
           "PropagateAtLaunch": "true"
         }]
       },
@@ -184,4 +208,11 @@ resource "aws_cloudformation_stack" "worker_group" {
   }
 }
 EOF
+
+  tags = "${merge(
+    local.aws_tags,
+    map(
+      "Name", "${var.cluster_name_short}-cfnstack-workers"
+    )
+  )}"
 }

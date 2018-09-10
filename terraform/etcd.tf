@@ -101,7 +101,7 @@ resource "aws_cloudformation_stack" "etcd_group" {
     "aws_s3_bucket_object.worker_key","aws_s3_bucket_object.worker_cert",
     "aws_s3_bucket_object.dashboard_key","aws_s3_bucket_object.dashboard_cert"
   ]
-  name = "${var.cluster_name_short}-etcd"
+  name = "${var.cluster_name_short}-cfnstack-etcd"
 
   template_body = <<EOF
 {
@@ -117,7 +117,7 @@ resource "aws_cloudformation_stack" "etcd_group" {
         "TerminationPolicies": ["OldestLaunchConfiguration", "OldestInstance"],
         "Tags": [{
           "Key": "Name",
-          "Value": "${var.cluster_name_short}-etcd",
+          "Value": "${var.cluster_name_short}-ec2-etcd",
           "PropagateAtLaunch": "true"
         },{
           "Key": "kubernetes.io/cluster/${var.cluster_name_short}",
@@ -126,6 +126,30 @@ resource "aws_cloudformation_stack" "etcd_group" {
         },{
           "Key": "KubernetesCluster",
           "Value": "${var.cluster_name_short}",
+          "PropagateAtLaunch": "true"
+        },{
+          "Key": "Role",
+          "Value": "${var.cluster_tags["Role"]}",
+          "PropagateAtLaunch": "true"
+        },{
+          "Key": "Service",
+          "Value": "${var.cluster_tags["Service"]}",
+          "PropagateAtLaunch": "true"
+        },{
+          "Key": "Business-Unit",
+          "Value": "${var.cluster_tags["Business-Unit"]}",
+          "PropagateAtLaunch": "true"
+        },{
+          "Key": "Owner",
+          "Value": "${var.cluster_tags["Owner"]}",
+          "PropagateAtLaunch": "true"
+        },{
+          "Key": "Purpose",
+          "Value": "${var.cluster_tags["Purpose"]}",
+          "PropagateAtLaunch": "true"
+        },{
+          "Key": "Terraform",
+          "Value": "True",
           "PropagateAtLaunch": "true"
         }]
       },
@@ -152,6 +176,13 @@ resource "aws_cloudformation_stack" "etcd_group" {
   }
 }
 EOF
+
+  tags = "${merge(
+    local.aws_tags,
+    map(
+      "Name", "${var.cluster_name_short}-cfnstack-etcd"
+    )
+  )}"
 }
 
 // Internal loadbalancer used for initial ETCD cluster lookup

@@ -8,7 +8,7 @@ resource "aws_security_group" "efs_sg" {
   name        = "${var.cluster_name_short}-efs"
   // omit `name` as it cannot be changed after it is set initially
 
-  description = "Rules for ${var.cluster_name_short} EFS"
+  description = "cluster ${var.cluster_name_short} EFS traffic"
   vpc_id      = "${data.terraform_remote_state.vpc.vpc_id}"
   
 
@@ -21,17 +21,12 @@ resource "aws_security_group" "efs_sg" {
   security_groups = ["${aws_security_group.controller_sg.id}","${aws_security_group.worker_sg.id}"]
   }
 
-  tags {
-    Name               = "${var.cluster_name_short}-sg-efs"
-    Terraform          = "${var.cluster_tags["Terraform"]}"
-    Env                = "${var.cluster_tags["Env"]}"
-    Role               = "${var.cluster_tags["Role"]}"
-    Owner              = "${var.cluster_tags["Owner"]}"
-    Team               = "${var.cluster_tags["Team"]}"
-    Project-Budget     = "${var.cluster_tags["Project-Budget"]}"
-    ScheduleInfo       = "${var.cluster_tags["ScheduleInfo"]}"
-    MonitoringInfo     = "${var.cluster_tags["MonitoringInfo"]}"
-  }
+  tags = "${merge(
+    local.aws_tags,
+    map(
+      "Name", "${var.cluster_name_short}-sg-efs"
+    )
+  )}"
 }
 
 // Create EFS
@@ -42,17 +37,12 @@ resource "aws_efs_file_system" "kube_efs" {
 
   #kms_key_id           = "${aws_kms_key.kube_efs_kms_key.arn}"
 
-  tags {
-    Name               = "${var.cluster_name_short}-efs"
-    Terraform          = "${var.cluster_tags["Terraform"]}"
-    Env                = "${var.cluster_tags["Env"]}"
-    Role               = "${var.cluster_tags["Role"]}"
-    Owner              = "${var.cluster_tags["Owner"]}"
-    Team               = "${var.cluster_tags["Team"]}"
-    Project-Budget     = "${var.cluster_tags["Project-Budget"]}"
-    ScheduleInfo       = "${var.cluster_tags["ScheduleInfo"]}"
-    MonitoringInfo     = "${var.cluster_tags["MonitoringInfo"]}"
-  }
+  tags = "${merge(
+    local.aws_tags,
+    map(
+      "Name", "${var.cluster_name_short}-efs"
+    )
+  )}"
 }
 
 resource "aws_efs_mount_target" "mount_target" {

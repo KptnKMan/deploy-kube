@@ -95,20 +95,17 @@ variable "kubernetes" {
 
 variable "cluster_tags" {
   default = {
-    Terraform           = "true"
-    Env                 = "Deployment"
-    Role                = "Deployment"
-    Owner               = "Kareem Operations"
-    Team                = "Kareem Operations"
-    Project-Budget      = "some-project-tag"
-    ScheduleInfo        = "StopNever"
-    MonitoringInfo      = "1"
+    Role                  = "Dev"
+    Service               = "Base Infrastructure"
+    Business-Unit         = "INFRE"
+    Owner                 = "OpsEng"
+    Purpose               = "Kubernetes Cluster"
   }
 }
 
 variable "efs_storage" {
   default = {
-    creation_token      = "defaultefstoken"
+    creation_token      = "kareempoc"
     performance_mode    = "generalPurpose"
     encrypted           = "true"
   }
