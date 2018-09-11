@@ -14,7 +14,7 @@ resource "aws_security_group" "controller_sg" {
     to_port         = "${var.kubernetes["api_server_secure_port"]}"
     protocol        = "tcp"
     self            = true
-    security_groups = ["${data.terraform_remote_state.vpc.common_sg_id}","${aws_security_group.kubernetes_controllers_elb_sg.id}"]
+    security_groups = ["${data.terraform_remote_state.vpc.sg_id_common}","${aws_security_group.kubernetes_controllers_elb_sg.id}"]
   }
 
   // Allow all systems for flannel overlay networking
@@ -23,7 +23,7 @@ resource "aws_security_group" "controller_sg" {
     to_port   = "8285"
     protocol  = "udp"
     self      = true
-    security_groups = ["${data.terraform_remote_state.vpc.common_sg_id}"]
+    security_groups = ["${data.terraform_remote_state.vpc.sg_id_common}"]
   }
 
   // Allow all systems for flannel overlay networking
@@ -32,7 +32,7 @@ resource "aws_security_group" "controller_sg" {
     to_port   = "8472"
     protocol  = "udp"
     self      = true
-    security_groups = ["${data.terraform_remote_state.vpc.common_sg_id}"]
+    security_groups = ["${data.terraform_remote_state.vpc.sg_id_common}"]
   }
 
   tags = "${merge(
@@ -97,7 +97,7 @@ resource "aws_launch_configuration" "controller_configuration" {
   key_name             = "${data.terraform_remote_state.vpc.key_pair_name}"
 
   user_data            = "${data.template_file.cloud_config_ubuntu_controller.rendered}"
-  security_groups      = ["${data.terraform_remote_state.vpc.common_sg_id}", "${aws_security_group.controller_sg.id}"]
+  security_groups      = ["${data.terraform_remote_state.vpc.sg_id_common}", "${aws_security_group.controller_sg.id}"]
 
   associate_public_ip_address = false
 
@@ -254,7 +254,7 @@ resource "aws_elb" "kubernetes_api_elb" {
   )}"
 
   cross_zone_load_balancing = true
-  security_groups           = ["${data.terraform_remote_state.vpc.common_sg_id}", "${aws_security_group.kubernetes_controllers_elb_sg.id}"]
+  security_groups           = ["${data.terraform_remote_state.vpc.sg_id_common}", "${aws_security_group.kubernetes_controllers_elb_sg.id}"]
 }
 
 // Internal loadbalancer for controllers
@@ -289,7 +289,7 @@ resource "aws_elb" "kubernetes_api_elb_internal" {
 
   internal                  = true
   cross_zone_load_balancing = true
-  security_groups           = ["${data.terraform_remote_state.vpc.common_sg_id}","${aws_security_group.controller_sg.id}"]
+  security_groups           = ["${data.terraform_remote_state.vpc.sg_id_common}","${aws_security_group.controller_sg.id}"]
 }
 
 // Outputs
@@ -300,5 +300,5 @@ output "_kube_deployed_version" {
   value = "kubernetes version being deployed: ${var.kubernetes["kube_version"]}"
 }
 output "_kube_deployed_docker_version" {
-  value = "kubernetes version being deployed: ${var.kubernetes["docker_version"]}"
+  value = "docker version being deployed: ${var.kubernetes["docker_version"]}"
 }

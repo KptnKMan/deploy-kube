@@ -11,7 +11,7 @@ resource "aws_security_group" "worker_sg" {
     to_port   = "32767"
     protocol  = "tcp"
     self      = true
-    security_groups = ["${data.terraform_remote_state.vpc.common_sg_id}"]
+    security_groups = ["${data.terraform_remote_state.vpc.sg_id_common}"]
   }
 
   // Allow external application access to all management IPs (This is default port range)
@@ -40,7 +40,7 @@ resource "aws_security_group" "worker_sg" {
     to_port   = "10255"
     protocol  = "tcp"
     self      = true
-    security_groups = ["${data.terraform_remote_state.vpc.common_sg_id}"]
+    security_groups = ["${data.terraform_remote_state.vpc.sg_id_common}"]
   }
 
   // Allow all systems for flannel overlay networking
@@ -49,7 +49,7 @@ resource "aws_security_group" "worker_sg" {
     to_port   = "8285"
     protocol  = "udp"
     self      = true
-    security_groups = ["${data.terraform_remote_state.vpc.common_sg_id}"]
+    security_groups = ["${data.terraform_remote_state.vpc.sg_id_common}"]
   }
 
   // Allow all systems for flannel overlay networking
@@ -58,7 +58,7 @@ resource "aws_security_group" "worker_sg" {
     to_port   = "8472"
     protocol  = "udp"
     self      = true
-    security_groups = ["${data.terraform_remote_state.vpc.common_sg_id}"]
+    security_groups = ["${data.terraform_remote_state.vpc.sg_id_common}"]
   }
 
   tags = "${merge(
@@ -125,7 +125,7 @@ resource "aws_launch_configuration" "worker_configuration" {
   key_name             = "${data.terraform_remote_state.vpc.key_pair_name}"
 
   user_data            = "${data.template_file.cloud_config_ubuntu_worker.rendered}"
-  security_groups      = ["${data.terraform_remote_state.vpc.common_sg_id}", "${aws_security_group.worker_sg.id}"]
+  security_groups      = ["${data.terraform_remote_state.vpc.sg_id_common}", "${aws_security_group.worker_sg.id}"]
 
   associate_public_ip_address = false
 

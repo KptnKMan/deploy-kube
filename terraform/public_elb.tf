@@ -88,5 +88,5 @@ resource "aws_elb" "kubernetes_public_elb" {
   )}"
 
   cross_zone_load_balancing = true
-  security_groups           = ["${data.terraform_remote_state.vpc.common_sg_id}", "${aws_security_group.kubernetes_public_elb_sg.id}"]
+  security_groups           = ["${data.terraform_remote_state.vpc.sg_id_common}", "${aws_security_group.kubernetes_public_elb_sg.id}"]
 }

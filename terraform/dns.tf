@@ -56,7 +56,7 @@ resource "aws_route53_record" "etcd" {
 }
 
 // Outputs
-output "_connect_bastion" {
+output "_connect_bastion_r53" {
   value = "${data.terraform_remote_state.vpc._connect_bastion_r53}"
 }
 

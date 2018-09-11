@@ -10,7 +10,7 @@ resource "aws_security_group" "etcd_sg" {
     to_port         = "2379"
     protocol        = "tcp"
     self            = true
-    security_groups = ["${data.terraform_remote_state.vpc.common_sg_id}"]
+    security_groups = ["${data.terraform_remote_state.vpc.sg_id_common}"]
   }
 
   // Allow ETCD traffic from kubernetes and bastion groups
@@ -19,7 +19,7 @@ resource "aws_security_group" "etcd_sg" {
     to_port         = "2380"
     protocol        = "tcp"
     self            = true
-    security_groups = ["${data.terraform_remote_state.vpc.common_sg_id}"]
+    security_groups = ["${data.terraform_remote_state.vpc.sg_id_common}"]
   }
 
   // Allow ETCD traffic from kubernetes and bastion groups
@@ -28,7 +28,7 @@ resource "aws_security_group" "etcd_sg" {
     to_port         = "4001"
     protocol        = "tcp"
     self            = true
-    security_groups = ["${data.terraform_remote_state.vpc.common_sg_id}"]
+    security_groups = ["${data.terraform_remote_state.vpc.sg_id_common}"]
   }
 
   // Allow ETCD traffic from kubernetes and bastion groups
@@ -37,7 +37,7 @@ resource "aws_security_group" "etcd_sg" {
     to_port         = "7001"
     protocol        = "tcp"
     self            = true
-    security_groups = ["${data.terraform_remote_state.vpc.common_sg_id}"]
+    security_groups = ["${data.terraform_remote_state.vpc.sg_id_common}"]
   }
 
   tags = "${merge(
@@ -73,7 +73,7 @@ resource "aws_launch_configuration" "etcd_configuration" {
   key_name             = "${data.terraform_remote_state.vpc.key_pair_name}"
 
   user_data            = "${data.template_file.cloud_config_ubuntu_etcd.rendered}"
-  security_groups      = ["${data.terraform_remote_state.vpc.common_sg_id}", "${aws_security_group.etcd_sg.id}"]
+  security_groups      = ["${data.terraform_remote_state.vpc.sg_id_common}", "${aws_security_group.etcd_sg.id}"]
 
   associate_public_ip_address = false
 
@@ -232,7 +232,7 @@ resource "aws_elb" "etcd_elb" {
   }
 
   cross_zone_load_balancing = true
-  security_groups           = ["${data.terraform_remote_state.vpc.common_sg_id}","${aws_security_group.etcd_sg.id}"]
+  security_groups           = ["${data.terraform_remote_state.vpc.sg_id_common}","${aws_security_group.etcd_sg.id}"]
 
   tags = "${merge(
     local.aws_tags,
