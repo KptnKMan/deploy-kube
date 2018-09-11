@@ -4,22 +4,28 @@ This repository contains Kareems New Kubernetes Deployment configuration.
 It's designed to use outputs from and be built on top of the Terraform [Base VPC and Bastion Template](https://github.com/KptnKMan/deploy-vpc-aws).
 This is designed to bring up a cluster in AWS (Amazon Web Services) that is empty and ready to manipulate.
 This is intended to eventually reflect production-ready implementation.
-Currently it is in testing, and may not work.
+This implementation is very stable, but it is in testing, and may not work if documentation is not followed.
 
 It contains:
 
 * [x] Documentation for setup and management
 * [x] Deployment Kubernetes Cluster
-* [ ] Default configuration and settings to build environment
+* [x] Default configuration and settings to build environment
 * [x] Scripts to create, update and cleanup infrastructure
 * [ ] Demo details of things to do with Kubernetes
 
 Additional documentation for setup can be found in [docs](docs), when they become available.
 
-Best to start at the [base vpc template setup doc](https://github.com/KptnKMan/deploy-vpc-aws/blob/master/docs/setup.md) to setup an environment.
+Best to start at the [base vpc template setup doc](https://github.com/KptnKMan/deploy-vpc-aws/blob/master/docs/setup.md) and then [this repos setup doc](docs/setup.md) to setup an environment.
 
 ## Basic Requirements
 
+* An AWS Account.
+  * No special AWS limits are required.
+* An AWS Route53 Hosted zone in your account.
+  * A Hosted zone is configured by default in this deployment.
+  * This is required for setup of DNS addresses which will make interaction with cluster easier.
+  * If you don't have/use a Route53 hosted zone, you should delete the [`dns.tf`](terraform/dns.tf) file, and ignore any references that are not ELB DNS addresses.
 * kubectl 1.10.6+
 * Terraform 0.11.7
 * ~~Ansible 2.4.1.0+~~
@@ -34,40 +40,36 @@ Best to start at the [base vpc template setup doc](https://github.com/KptnKMan/d
 TBC
 
 * AWS
-
-VPC
-Internet Gateway
-Route Tables
-Subnets
-S3 Buckets
-EFS storage
-Route53 DNS
-ASG Controller
-ASG ETCD
-ASG Worker
+  * VPC
+  * Internet Gateway
+  * Route Tables
+  * Subnets
+  * S3 Buckets
+  * EFS storage
+  * Route53 DNS
+  * ASG Controller
+  * ASG ETCD
+  * ASG Worker
 
 * Master/Controller Server
-
-docker-bootstrap.service
-flannel.service
-kube-apiserver.service
-kube-controller-manager.service
-kube-scheduler.service
-kube-proxy.service
+  * docker-bootstrap.service
+  * flannel.service
+  * kube-apiserver.service
+  * kube-controller-manager.service
+  * kube-scheduler.service
+  * kube-proxy.service
 
 * Etcd Server
-
-docker.service
-etcd.service (now etcd3 :) )
-cfn-signal.service
+  * docker.service
+  * etcd.service (now etcd3 :) )
+  * cfn-signal.service
 
 * Worker Nodes
-
-docker-bootstrap.service
-flannel.service
-docker.service
-kubelet.service
-kube-proxy.service
+  * docker-bootstrap.service
+  * flannel.service
+  * docker.service
+  * kubelet.service
+  * kube-proxy.service
 
 ## Things to do/know to deploy this template
 
@@ -115,18 +117,20 @@ Terraform Inputs:
 ## Todos & Known issues
 
 * security
-  * [ ] find better way for SSL cert distribution
+  * [ ] find better way for TLS cert distribution
+    * encrypted EFS store?
     * encrypted S3?
     * hashicorp vault?
     * simple DB storage?
   * [x] paramaterise SSL .cnf template
   * [x] translate SSL provisioning to terraform native
   * [x] terraform provision instance SSH keypair
+  * [ ] LetsEncrypt-enabled host-based routing working
 * documentation
-  * [ ] setup doc with example cli commands
+  * [x] setup doc with example cli commands
   * [ ] demo doc with example cli commands
   * [ ] Create working demo of Kube services including ELB-ingress
-    * [x] core services - kube-dns & dashboard
+    * [x] core services - kube-dns, dashboard & efs-storage
     * [ ] ingress demo - basic
     * [ ] ingress demo - host-based routing
     * [ ] ingress demo - kube-ingress-aws
@@ -149,7 +153,7 @@ Terraform Inputs:
     * [ ] autoscaler IAM policy
   * [x] figure out friggin v1.8.x RBAC!
   * [ ] RBAC: get basic roles organised/documented
-  * [x] RBAC: get kubelet node role organised (requires at-deploy provisioning certs)
+  * [x] RBAC: get kubelet node role organised (requires deploy-time provisioning certs)
 * terraform
   * [x] update terraform to latest 10.x
   * [ ] update terraform to latest 11.x
