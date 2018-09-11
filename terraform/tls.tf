@@ -4,7 +4,7 @@ data "template_file" "kubeconfig_admin" {
 
   vars {
     # elb_name               = "${aws_elb.kubernetes_api_elb.dns_name}"
-    elb_name               = "${var.dns_urls["url_admiral"]}.${var.dns_domain_public}"
+    elb_name               = "${aws_elb.kubernetes_api_elb.dns_name}"
     cluster_name_short     = "${var.cluster_name_short}"
     key_type               = "admin"
     api_server_secure_port = "${var.kubernetes["api_server_secure_port"]}"

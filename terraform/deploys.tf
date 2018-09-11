@@ -35,6 +35,8 @@ data "template_file" "deploy_efs_storageclaim" {
 
     cluster_dns        = "${var.kubernetes["cluster_dns"]}"
     cluster_domain     = "${var.kubernetes["cluster_domain"]}"
+    namespace_public   = "${var.kubernetes["namespace_public"]}"
+    namespace_private  = "${var.kubernetes["namespace_private"]}"
 
     cluster_name_short = "${var.cluster_name_short}"
     cluster_config_location = "${var.cluster_config_location}"
