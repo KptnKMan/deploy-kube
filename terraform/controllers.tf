@@ -192,7 +192,7 @@ EOF
 // Security Group for API Controller ELB
 resource "aws_security_group" "kubernetes_controllers_elb_sg" {
   name        = "${var.cluster_name_short}-sg-elb-api"
-  description = "cluster ${var.cluster_name_short} traffic from API ELB to API controllers"
+  description = "cluster ${var.cluster_name_short} API ELB to API controllers traffic"
   vpc_id      = "${data.terraform_remote_state.vpc.vpc_id}"
 
   # Allow access to controller from management ips and cluster itself

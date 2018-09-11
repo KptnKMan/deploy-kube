@@ -1,7 +1,7 @@
 // Security Group for Public Ingress ELB
 resource "aws_security_group" "kubernetes_public_elb_sg" {
   name        = "${var.cluster_name_short}-sg-elb-ingress-public"
-  description = "cluster ${var.cluster_name_short} Traffic from Public ELB to Kubernetes Workers"
+  description = "cluster ${var.cluster_name_short} Public ELB to Kubernetes Workers Traffic"
   vpc_id      = "${data.terraform_remote_state.vpc.vpc_id}"
 
 # Allow incoming HTTPS from public internet
