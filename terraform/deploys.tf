@@ -142,17 +142,17 @@ output "__post_deploy_config_1st" {
 }
 
 output "__post_deploy_config_2nd" {
-  value = "deploy kubedns using: kubectl --kubeconfig config/kubeconfig apply -f deploys/deploy_dashboard.yaml"
+  value = "deploy dashboard using: kubectl --kubeconfig config/kubeconfig apply -f deploys/deploy_dashboard.yaml"
 }
 
 output "__post_deploy_config_3rd" {
-  value = "deploy kubedns using: kubectl --kubeconfig config/kubeconfig apply -f deploys/deploy_efs_storageclaim.yaml"
+  value = "deploy EFS storage using: kubectl --kubeconfig config/kubeconfig apply -f deploys/deploy_efs_storageclaim.yaml"
 }
 
 output "__post_deploy_config_4th" {
   value = "deploy nginx demo using: kubectl --kubeconfig config/kubeconfig apply -f deploys/deploy_demo_nginx.yaml"
 }
 
-output "__post_deploy_config_5th_ADVANCED" {
-  value = "deploy kubedns using: ansible-playbook ../deploy-kube-base/scripts/deploy-base.yaml"
-}
+# output "__post_deploy_config_5th_ADVANCED" {
+#   value = "deploy Kube BASE using: ansible-playbook ../deploy-kube-base/scripts/deploy-base.yaml"
+# }
