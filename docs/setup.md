@@ -26,6 +26,10 @@ Example details of spinning up an example functioning and working cluster will b
 
 ## Cleanup
 
-Note: Remember to tear down this environment before the base vpc template.
+### Notes
+
+* Remember to tear down this environment before the base vpc template.
+
+### Tear down environment
 
 Follow details in [this part of the base vpc template setup doc](https://github.com/KptnKMan/deploy-vpc-aws/blob/master/docs/setup.md#cleanup).
