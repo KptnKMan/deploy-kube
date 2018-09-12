@@ -5,7 +5,7 @@
 # aws_availability_zones  = ["eu-west-1a","eu-west-1b","eu-west-1c"]
 
 // private key file name
-key_name                = "kareempoc"
+# key_name                = "kareempoc"
 
 // Name of cluster, used for tagging
 cluster_name            = "Kareem POC Deployment"
@@ -90,7 +90,6 @@ kubernetes {
   // Kubernetes deployment variables
   namespace_public      = "kube-public" # default PUBLIC namespace that all services are deployed into
   namespace_private     = "default" # default PRIVATE namespace all services will be deployed into
-  public_elb            = "google.com" # change this to the address of your kube-ingress-aws ELB/ALB dns-address
 
   // Public facing ports for the default ingress
   ingress_port_http     = "32004" # port that cluster services expose, must be between 30000-32767
@@ -100,9 +99,8 @@ kubernetes {
   public_elb_cidr       = "0.0.0.0/0" # IP range public ELB exposes to internet
 
   // Extra management IP - Leave blank or add full CIDR here (Eg: 1.1.1.1/1,2.2.2.2/2 comma separated, no spaces)
-  ingress_extra_ip      = "0.0.0.0/0" # <-- REMOVE, management IPs should be added to root template
-  letsencrypt_email     = "kareem.straker@gmail.com"
-  letsencrypt_secret    = "deez-certs"
+  letsencrypt_email     = "some.email@myemail.com" # Your email used for LetsEncrypt
+  letsencrypt_secret    = "deez-certs" # Password used for LetsEncrypt
 }
 
 // Common Tags for all resources in deployment
@@ -111,7 +109,7 @@ cluster_tags = {
   Service               = "Base Infrastructure"
   Business-Unit         = "INFRE"
   Owner                 = "OpsEng"
-  Purpose               = "Kubernetes Cluster"
+  Purpose               = "Terraform Kubernetes Cluster"
 }
 
 // EFS storage for cluster backups and usage
