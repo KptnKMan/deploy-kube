@@ -1,10 +1,11 @@
 # Kareems New Kubernetes
 
 This repository contains Kareems New Kubernetes Deployment configuration.
-It's designed to use outputs from and be built on top of the Terraform [Base VPC and Bastion Template](https://github.com/KptnKMan/deploy-vpc-aws).
 This is designed to bring up a cluster in AWS (Amazon Web Services) that is empty and ready to manipulate.
-This is intended to eventually reflect production-ready implementation.
-This implementation is very stable, but it is in testing, and may not work if documentation is not followed.
+This is intended to eventually reflect a production-ready implementation and is very stable, but it is in testing, and may not work if documentation is not followed.
+This template uses Terraform outputs from the [Base VPC and Bastion Template](https://github.com/KptnKMan/deploy-vpc-aws). This template should be deployed after (and be torn down before) that initial template.
+
+This is essentially my own 'Kubernetes from scratch' setup, made to work (eventually) on any public cloud provider (Intended: Amazon Web Services, Microsoft Azure, Google Cloud).
 
 It contains:
 
@@ -16,19 +17,25 @@ It contains:
 
 Additional documentation for setup can be found in [docs](docs), when they become available.
 
+## Quickstart / Where to begin
+
 Best to start at the [base vpc template setup doc](https://github.com/KptnKMan/deploy-vpc-aws/blob/master/docs/setup.md) and then [this repos setup doc](docs/setup.md) to setup an environment.
+
+After following the setup docs, you may want to check the [demo deploys doc](docs/demo.md) for details of how to setup a full-featured environment. This has examples of how to setup Kube objects like Ingress, Helm and Rancher.
 
 ## Basic Requirements
 
+* kubectl 1.10.6+
+* Terraform 0.11.7
+* ~~Ansible 2.4.1.0+~~
 * An AWS Account.
   * No special AWS limits are required.
 * An AWS Route53 Hosted zone in your account.
   * A Hosted zone is configured by default in this deployment.
   * This is required for setup of DNS addresses which will make interaction with cluster easier.
-  * If you don't have/use a Route53 hosted zone, you should delete the [`dns.tf`](terraform/dns.tf) file, and ignore any references that are not ELB DNS addresses.
-* kubectl 1.10.6+
-* Terraform 0.11.7
-* ~~Ansible 2.4.1.0+~~
+  * If you don't have/use a Route53 hosted zone, you should delete the [`dns.tf`](terraform/dns.tf) file before doing anything, and ignore any references that are not ELB DNS addresses.
+  * If you delete the `dns.tf` file, it is assumed you know what you're doing, and some of the demo deploys (Like ingress, which requires a routable URL) will not work.
+  * There is no need to remove the custom URLs from the [variables.tf](terraform/variables.tf) or [cluster.tfvars](config/cluster.tfvars) files. References in the demo deploys will break if they are removed, so just ignore them.
 * ~~an ssh public/private keypair in /config dir~~
   * the ssh-keypair name is inherited from the output of the parent base vpc template.
   * the ssh-keypair will be auto-generated into the /config dir of the base vpc template.
@@ -39,11 +46,13 @@ Best to start at the [base vpc template setup doc](https://github.com/KptnKMan/d
 
 TBC
 
-* AWS
+* AWS (Available from [base vpc template](https://github.com/KptnKMan/deploy-vpc-aws))
   * VPC
   * Internet Gateway
   * Route Tables
   * Subnets
+
+* Kubernetes Cluster (This template)
   * S3 Buckets
   * EFS storage
   * Route53 DNS
