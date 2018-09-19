@@ -11,16 +11,6 @@ variable "aws_region" {
   default                 = "eu-west-1"
 }
 
-variable "aws_availability_zones" {
-  type                    = "list"
-  default                 = ["eu-west-1a","eu-west-1b","eu-west-1c"]
-}
-
-# variable "key_name" {
-  # type                    = "string"
-  # default                 = "kareempoc"
-# }
-
 variable "cluster_name" {
   type                    = "string"
   default                 = "kareempoc"
@@ -101,7 +91,7 @@ variable "kubernetes" {
     service_ip_range      = "10.5.0.0/24"
     service_ip            = "10.4.0.1"
     cluster_dns           = "10.4.0.10"
-    cluster_domain        = "kubernetes.local"
+    cluster_domain        = "kareempoc.local"
     api_server_secure_port   = "6443"
     api_server_insecure_port = "8080"
 

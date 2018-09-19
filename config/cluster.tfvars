@@ -1,11 +1,5 @@
 // Set AWS region
-# aws_region              = "eu-west-1"
-
-// Set AWS Region AZs
-# aws_availability_zones  = ["eu-west-1a","eu-west-1b","eu-west-1c"]
-
-// private key file name
-# key_name                = "kareempoc"
+aws_region              = "eu-west-1"
 
 // Name of cluster, used for tagging
 cluster_name            = "Kareem POC Deployment"
@@ -83,20 +77,20 @@ kubernetes {
   service_ip_range      = "10.5.0.0/24" # aka service-cluster-ip-range / service-network
   service_ip            = "10.5.0.1" # aka MASTER_CLUSTER_IP
   cluster_dns           = "10.5.0.10" # DNS server inside cluster (kube-dns)
-  cluster_domain        = "kubernetes.local" # cluster domain
+  cluster_domain        = "kareempoc.local" # cluster domain, recommended to make a unique name for this.
   api_server_secure_port   = "6443" # Controllers API Server http port
   api_server_insecure_port = "8080" # Controllers API Server https port
 
   // Kubernetes deployment variables
-  namespace_public      = "kube-public" # default PUBLIC namespace that all services are deployed into
-  namespace_private     = "default" # default PRIVATE namespace all services will be deployed into
+  namespace_public      = "default" # default PUBLIC namespace that all services are deployed into (usually default or kube-public)
+  namespace_private     = "default" # default PRIVATE namespace all services will be deployed into (usually default or kube-system)
 
   // Public facing ports for the default ingress
   ingress_port_http     = "32004" # port that cluster services expose, must be between 30000-32767
   ingress_port_https    = "32005" # port that cluster services expose, must be between 30000-32767
   public_elb_port_http  = "80" # port public ELB exposes to internet
   public_elb_port_https = "443" # port public ELB exposes to internet
-  public_elb_cidr       = "0.0.0.0/0" # IP range public ELB exposes to internet
+  public_elb_cidr       = "0.0.0.0/0" # IP range public ELB exposes to internet, limit to "you.rpu.bli.cip/32" if you want only you.
 
   // Extra management IP - Leave blank or add full CIDR here (Eg: 1.1.1.1/1,2.2.2.2/2 comma separated, no spaces)
   letsencrypt_email     = "some.email@myemail.com" # Your email used for LetsEncrypt

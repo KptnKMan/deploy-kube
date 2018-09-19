@@ -49,7 +49,7 @@ resource "aws_efs_mount_target" "mount_target" {
   file_system_id       = "${aws_efs_file_system.kube_efs.id}"
   subnet_id            = "${element(data.terraform_remote_state.vpc.vpc_subnets_private,count.index)}" # iterate through subnets, use AZ counter
   security_groups      = ["${aws_security_group.efs_sg.id}"]
-  count                = "${length(var.aws_availability_zones)}" # AZ counter, return number of AZs
+  count                = "${length(data.terraform_remote_state.vpc.vpc_region_azs)}" # AZ counter, return number of AZs
 }
 
 // Outputs
