@@ -146,11 +146,14 @@ Terraform Inputs:
       * [ ] kube-ingress-aws IAM policy
 * etcd concerns
   * [x] resolve etcd provisioning
-  * [x] update etcd to latest 3.x+
-  * [ ] etcd backups
+  * [ ] all etcd communication using TLS certs
   * [ ] rebuild etcd image with open logic
   * [x] etcd-aws-py docker-image ready
+    * [x] update etcd to latest 3.x+
+    * [ ] etcd 3.x backups
   * [ ] etcd-aws-go docker-image ready
+    * [ ] update etcd to latest 3.x+
+    * [ ] etcd 3.x backups
 * kubernetes
   * [x] update kube to latest 1.8.x
   * [x] update kube to latest 1.10.6 stable
