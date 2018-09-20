@@ -36,9 +36,10 @@ After following the setup docs, you may want to check the [demo deploys doc](doc
   * If you don't have/use a Route53 hosted zone, you should delete the [`dns.tf`](terraform/dns.tf) file before doing anything, and ignore any references that are not ELB DNS addresses.
   * If you delete the `dns.tf` file, it is assumed you know what you're doing, and some of the demo deploys (Like ingress, which requires a routable URL) will not work.
   * There is no need to remove the custom URLs from the [variables.tf](terraform/variables.tf) or [cluster.tfvars](config/cluster.tfvars) files. References in the demo deploys will break if they are removed, so just ignore them.
-* ~~an ssh public/private keypair in /config dir~~
+* SSH/TLS Keypair creation for cluster
   * the ssh-keypair name is inherited from the output of the parent base vpc template.
   * the ssh-keypair will be auto-generated into the /config dir of the base vpc template.
+  * all TLS certs will be created and placed in the /config/ssl dir
 
 ## Main Components
 
