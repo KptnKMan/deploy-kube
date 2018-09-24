@@ -80,6 +80,9 @@ data "template_file" "cloud_config_ubuntu_controller" {
     NODE_FQDN          = "${replace("%{NODE_FQDN}", "%", "$")}"
     NODE_IP            = "${replace("%{NODE_IP}", "%", "$")}"
 
+    state_bucket       = "${aws_s3_bucket.state_bucket.id}"
+    backup_bucket      = "${aws_s3_bucket.backup_bucket.id}"
+
     instance_group     = "controllers"
   }
 }
@@ -293,6 +296,9 @@ resource "aws_elb" "kubernetes_api_elb_internal" {
 }
 
 // Outputs
+output "aws_elb_dns_api_public" {
+  value = "${aws_elb.kubernetes_api_elb.dns_name}"
+}
 output "_kube_connection_details" {
   value = "connect to api-server using: kubectl --kubeconfig config/kubeconfig get nodes"
 }

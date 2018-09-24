@@ -1,3 +1,7 @@
+// Default variables file
+// Variables here are used if no variable is set elsewhere
+// Variables here are overriden by the deploy variables file
+
 variable "aws_access_key" {
   type                    = "string"
 }
@@ -38,7 +42,6 @@ variable "dns_domain_public" {
 
 variable "dns_urls" {
   type = "map"
-
   default = {
     url_public            = "*"
     url_admiral           = "kareempoc-admiral"
@@ -50,6 +53,7 @@ variable "dns_urls" {
 }
 
 variable "instance_types" {
+  type = "map"
   default = {
     controller            = "m4.large"
     etcd                  = "m4.large"
@@ -65,7 +69,6 @@ variable "instance_types" {
 
 variable "instances" {
   type = "map"
-
   default = {
     controller_min        = 1
     controller_max        = 1
@@ -77,11 +80,13 @@ variable "instances" {
 }
 
 variable "kubernetes" {
+  type = "map"
   default = {
     docker_version        = "18.3.0"
     kube_version          = "1.10.6"
     flannel_version       = "0.10.0"
     etcd_version          = "3.2.24"
+    etcd_elb_internal     = true
 
     apiserver_runtime     = "api/all=true"
     authorization_mode    = "Node,RBAC,AlwaysAllow"
@@ -110,6 +115,7 @@ variable "kubernetes" {
 }
 
 variable "cluster_tags" {
+  type = "map"
   default = {
     Role                  = "Dev"
     Service               = "Base Infrastructure"
@@ -120,6 +126,7 @@ variable "cluster_tags" {
 }
 
 variable "efs_storage" {
+  type = "map"
   default = {
     creation_token        = "kareempoc"
     performance_mode      = "generalPurpose"

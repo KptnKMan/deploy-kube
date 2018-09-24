@@ -108,7 +108,10 @@ data "template_file" "cloud_config_ubuntu_worker" {
     url_admiral        = "${var.dns_urls["url_admiral"]}"
     dns_domain_public  = "${var.dns_domain_public}"
 
-    instance_group     = "primary-worker"
+    state_bucket       = "${aws_s3_bucket.state_bucket.id}"
+    backup_bucket      = "${aws_s3_bucket.backup_bucket.id}"
+
+    instance_group     = "workers-primary"
   }
 }
 

@@ -1,3 +1,7 @@
+// Deploy variables file
+// Variables here override the default variables file
+// Variables here are overriden by command line and ENV variables at runtime
+
 // Set AWS region
 aws_region              = "eu-west-1"
 
@@ -64,6 +68,7 @@ kubernetes {
   // do not change these after cluster build
   // ETCD version used for ETCDCTL installation
   etcd_version          = "3.2.24" # "3.2.20" # "3.2.24" # v3.3.9"
+  etcd_elb_internal     = true # if the single ELB should be internal (true) or public (false)
 
   // do not change these after cluster build
   // supported API runtimes of api-server on master/controller - keep on 1 line

@@ -53,10 +53,11 @@ data "template_file" "cloud_config_ubuntu_etcd" {
   template = "${file("terraform/templates/cloud_config_ubuntu_etcd.yaml")}"
 
   vars {
-    etcd_backup_bucket = "${aws_s3_bucket.backup_bucket.id}"
     docker_version     = "${var.kubernetes["docker_version"]}"
     etcd_version       = "${var.kubernetes["etcd_version"]}"
     cluster_name_short = "${var.cluster_name_short}"
+    state_bucket       = "${aws_s3_bucket.state_bucket.id}"
+    backup_bucket      = "${aws_s3_bucket.backup_bucket.id}"
   }
 }
 
@@ -190,8 +191,8 @@ resource "aws_elb" "etcd_elb" {
   name     = "${var.cluster_name_short}-elb-etcd-internal"
 
   subnets  = ["${data.terraform_remote_state.vpc.vpc_subnets_private}"]
-  
-  internal = true
+
+  internal = "${var.kubernetes["etcd_elb_internal"]}"
 
   idle_timeout = 100
 
