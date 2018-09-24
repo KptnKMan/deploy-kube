@@ -69,6 +69,19 @@ write_files:
       [Install]
       WantedBy=multi-user.target
 
+  - path: /usr/bin/download_certs.sh
+    content: |
+      #!/bin/bash
+      set -e
+
+      # Test connection to S3
+      aws s3 ls s3://${state_bucket}/ssl/
+
+      # Download certs
+      aws s3 cp s3://${state_bucket}/ssl/ca.pem /etc/kubernetes/ssl/ca.pem
+      aws s3 cp s3://${state_bucket}/ssl/etcdserver.key /etc/kubernetes/ssl/etcdserver.key
+      aws s3 cp s3://${state_bucket}/ssl/etcdserver.pem /etc/kubernetes/ssl/etcdserver.pem
+
   - path: /usr/bin/install_docker.sh
     content: |
       #!/bin/bash

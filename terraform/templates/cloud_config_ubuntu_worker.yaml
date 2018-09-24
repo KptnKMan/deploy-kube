@@ -262,12 +262,12 @@ write_files:
       set -e
 
       # Test connection to S3
-      aws s3 ls s3://kareempoc-state/ssl/
+      aws s3 ls s3://${state_bucket}/ssl/
 
       # Download certs
-      aws s3 cp s3://kareempoc-state/ssl/ca.key /etc/kubernetes/ssl/ca.key
-      aws s3 cp s3://kareempoc-state/ssl/ca.pem /etc/kubernetes/ssl/ca.pem
-      aws s3 cp s3://kareempoc-state/ssl/worker.key /etc/kubernetes/ssl/worker.key
+      aws s3 cp s3://${state_bucket}/ssl/ca.key /etc/kubernetes/ssl/ca.key
+      aws s3 cp s3://${state_bucket}/ssl/ca.pem /etc/kubernetes/ssl/ca.pem
+      aws s3 cp s3://${state_bucket}/ssl/worker.key /etc/kubernetes/ssl/worker.key
 
   - path: /etc/kubernetes/ssl/worker_openssl.cnf
     owner: root
