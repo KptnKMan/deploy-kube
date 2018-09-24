@@ -1,8 +1,13 @@
 # Deploy-Kube Setup Doc
 
-Note: Currently, nearly all setup details are identical to those in the [base vpc template setup doc](https://github.com/KptnKMan/deploy-vpc-aws/blob/master/docs/setup.md).
+This doc is intended to:
 
-Note: Any contradiction of requirements/instructions, use the child templates (THIS TEMPLATE) instructions.
+* Help you help you bootstrap a working Kubernetes environment using the Terraform code in this repo.
+
+## Notes - PLEASE READ
+
+* Currently, nearly all setup details are identical to those in the [base vpc template setup doc](https://github.com/KptnKMan/deploy-vpc-aws/blob/master/docs/setup.md).
+* Any contradiction of requirements/instructions, use the child templates (THIS TEMPLATE IS A CHILD TEMPLATE) instructions.
 
 ## Setup Tools
 
