@@ -22,7 +22,7 @@ dns_domain_public       = "bifromedia.com"
 
 // URL prefixes for cluster components
 dns_urls = {
-  url_public            = "*" # "kareempoc" # primary public alias
+  url_public            = "kareempoc-pub" # primary public alias
   url_admiral           = "kareempoc-admiral" # API server alias
   url_etcd              = "kareempoc-etcd" # ETCD cluster alias
   url_letsencrypt       = "kareempoc-sslmebaby" # for LetsEncrypt
