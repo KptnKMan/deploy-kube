@@ -296,8 +296,11 @@ resource "aws_elb" "kubernetes_api_elb_internal" {
 }
 
 // Outputs
-output "aws_elb_dns_api_public" {
+output "aws_api_elb_dns_api_public" {
   value = "${aws_elb.kubernetes_api_elb.dns_name}"
+}
+output "aws_api_elb_secure_port" {
+  value = "${var.kubernetes["api_server_secure_port"]}"
 }
 output "_kube_connection_details" {
   value = "connect to api-server using: kubectl --kubeconfig config/kubeconfig get nodes"

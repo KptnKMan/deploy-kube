@@ -9,7 +9,7 @@ metadata:
   name: default-http-backend
   labels:
     app: default-http-backend
-  namespace: ${namespace_public}
+  namespace: ${namespace_system}
 spec:
   replicas: 1
   selector:
@@ -51,7 +51,7 @@ apiVersion: v1
 kind: Service
 metadata:
   name: default-http-backend
-  namespace: ${namespace_public}
+  namespace: ${namespace_system}
   labels:
     app: default-http-backend
 spec:
@@ -66,7 +66,7 @@ kind: ConfigMap
 apiVersion: v1
 metadata:
   name: nginx-configuration
-  namespace: ${namespace_public}
+  namespace: ${namespace_system}
   labels:
     app: ingress-nginx
 ---
@@ -75,21 +75,21 @@ kind: ConfigMap
 apiVersion: v1
 metadata:
   name: tcp-services
-  namespace: ${namespace_public}
+  namespace: ${namespace_system}
 ---
 # ------------------- udp-services ConfigMap ------------------- #
 kind: ConfigMap
 apiVersion: v1
 metadata:
   name: udp-services
-  namespace: ${namespace_public}
+  namespace: ${namespace_system}
 ---
 # ------------------- nginx-ingress-controller Deployment ------------------- #
 apiVersion: apps/v1beta2
 kind: Deployment
 metadata:
   name: nginx-ingress-controller
-  namespace: ${namespace_public}
+  namespace: ${namespace_system}
 spec:
   replicas: 1
   selector:
@@ -119,10 +119,10 @@ spec:
           image: quay.io/kubernetes-ingress-controller/nginx-ingress-controller:0.17.1 # 0.19.0
           args:
             - /nginx-ingress-controller
-            - --default-backend-service=${namespace_public}/default-http-backend
-            - --configmap=${namespace_public}/nginx-configuration
-            - --tcp-services-configmap=${namespace_public}/tcp-services
-            - --udp-services-configmap=${namespace_public}/udp-services
+            - --default-backend-service=${namespace_system}/default-http-backend
+            - --configmap=${namespace_system}/nginx-configuration
+            - --tcp-services-configmap=${namespace_system}/tcp-services
+            - --udp-services-configmap=${namespace_system}/udp-services
             - --annotations-prefix=nginx.ingress.kubernetes.io
           env:
             - name: POD_NAME
@@ -163,7 +163,7 @@ apiVersion: v1
 kind: Service
 metadata:
   name: ingress-nginx
-  namespace: ${namespace_public}
+  namespace: ${namespace_system}
 spec:
   type: NodePort
   ports:

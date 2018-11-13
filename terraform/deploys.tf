@@ -36,7 +36,7 @@ data "template_file" "deploy_efs_storageclaim" {
     cluster_dns        = "${var.kubernetes["cluster_dns"]}"
     cluster_domain     = "${var.kubernetes["cluster_domain"]}"
     namespace_public   = "${var.kubernetes["namespace_public"]}"
-    namespace_private  = "${var.kubernetes["namespace_private"]}"
+    namespace_system   = "${var.kubernetes["namespace_system"]}"
 
     cluster_name_short = "${var.cluster_name_short}"
     cluster_config_location = "${var.cluster_config_location}"
@@ -51,7 +51,7 @@ data "template_file" "deploy_demo_nginx" {
     cluster_dns        = "${var.kubernetes["cluster_dns"]}"
     cluster_domain     = "${var.kubernetes["cluster_domain"]}"
     namespace_public   = "${var.kubernetes["namespace_public"]}"
-    namespace_private  = "${var.kubernetes["namespace_private"]}"
+    namespace_system   = "${var.kubernetes["namespace_system"]}"
 
     cluster_name_short = "${var.cluster_name_short}"
     cluster_config_location = "${var.cluster_config_location}"
@@ -66,7 +66,7 @@ data "template_file" "deploy_demo_ingress" {
     cluster_dns        = "${var.kubernetes["cluster_dns"]}"
     cluster_domain     = "${var.kubernetes["cluster_domain"]}"
     namespace_public   = "${var.kubernetes["namespace_public"]}"
-    namespace_private  = "${var.kubernetes["namespace_private"]}"
+    namespace_system   = "${var.kubernetes["namespace_system"]}"
 
     cluster_name_short = "${var.cluster_name_short}"
     cluster_config_location = "${var.cluster_config_location}"
@@ -81,7 +81,7 @@ data "template_file" "deploy_demo_ingress_aws" {
     cluster_dns        = "${var.kubernetes["cluster_dns"]}"
     cluster_domain     = "${var.kubernetes["cluster_domain"]}"
     namespace_public   = "${var.kubernetes["namespace_public"]}"
-    namespace_private  = "${var.kubernetes["namespace_private"]}"
+    namespace_system   = "${var.kubernetes["namespace_system"]}"
 
     cluster_name_short = "${var.cluster_name_short}"
     cluster_config_location = "${var.cluster_config_location}"
@@ -96,7 +96,7 @@ data "template_file" "deploy_demo_letsencrypt" {
     cluster_dns        = "${var.kubernetes["cluster_dns"]}"
     cluster_domain     = "${var.kubernetes["cluster_domain"]}"
     namespace_public   = "${var.kubernetes["namespace_public"]}"
-    namespace_private  = "${var.kubernetes["namespace_private"]}"
+    namespace_system   = "${var.kubernetes["namespace_system"]}"
 
     ingress_port_http  = "${var.kubernetes["ingress_port_http"]}"
     ingress_port_https = "${var.kubernetes["ingress_port_https"]}"
@@ -150,7 +150,7 @@ output "__post_deploy_config_3rd" {
 }
 
 output "__post_deploy_config_4th" {
-  value = "deploy nginx demo using: kubectl --kubeconfig config/kubeconfig apply -f deploys/deploy_demo_nginx.yaml"
+  value = "deploy nginx demo using: kubectl --kubeconfig config/kubeconfig apply -f deploys/deploy_demo_ingress.yaml"
 }
 
 # output "__post_deploy_config_5th_ADVANCED" {
