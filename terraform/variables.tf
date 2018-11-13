@@ -101,7 +101,7 @@ variable "kubernetes" {
     api_server_insecure_port = "8080"
 
     namespace_public      = "default"
-    namespace_private     = "default"
+    namespace_system      = "kube-system"
 
     ingress_port_http     = "32004"
     ingress_port_https    = "32005"

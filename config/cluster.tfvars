@@ -32,9 +32,9 @@ dns_urls = {
 
 instance_types = {
   // instance sizes of ec2 instances - may require terraform taint of ASG to update
-  controller            = "t3.small" // "m1.small" // "m4.large"
-  etcd                  = "t3.small" // "m1.small" // "m4.large"
-  worker                = "t3.small" // "m1.small" // "m4.2xlarge"
+  controller            = "m3.medium" // "m1.small" // "m4.large"
+  etcd                  = "m3.medium" // "m1.small" // "m4.large"
+  worker                = "m3.medium" // "m1.small" // "m4.2xlarge"
 
   // grace period in seconds to wait between cycling nodes in ASGs
   controller_wait       = "PT30S" // "PT160S"
@@ -42,7 +42,7 @@ instance_types = {
   worker_wait           = "PT30S" // "PT200S"
 
   // Not the spot price you pay all the time, but maximum bid
-  spot_max_bid          = "7.2"
+  spot_max_bid          = "0.073" // 0.073 = m3.medium on-demand
 }
 
 // ASG sizing
@@ -87,8 +87,8 @@ kubernetes {
   api_server_insecure_port = "8080" # Controllers API Server https port
 
   // Kubernetes deployment variables
-  namespace_public      = "default" # default PUBLIC namespace that all services are deployed into (usually default or kube-public)
-  namespace_private     = "default" # default PRIVATE namespace all services will be deployed into (usually default or kube-system)
+  namespace_public      = "default" # default PUBLIC namespace that all services are deployed into (usually default)
+  namespace_system      = "kube-system" # default SYSTEM namespace all services will be deployed into (usually kube-system)
 
   // Public facing ports for the default ingress
   ingress_port_http     = "32004" # port that cluster services expose, must be between 30000-32767
