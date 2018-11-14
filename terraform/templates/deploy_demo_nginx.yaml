@@ -13,11 +13,17 @@ metadata:
   namespace: ${namespace_public}
   # resource labels
   labels:
-    k8s-app: ${cluster_name_short}-example
+    app: ${cluster_name_short}-example
 spec:
   # how many replicas in cluster
   replicas: 1
+  selector:
+    matchLabels:
+      app: ${cluster_name_short}-example
   template:
+    metadata:
+      labels:
+        app: ${cluster_name_short}-example
     spec:
       # spec of pods/containers here
       containers:
@@ -41,7 +47,7 @@ metadata:
   namespace: ${namespace_public}
   # resource labels
   labels:
-    k8s-app: ${cluster_name_short}-example
+    app: ${cluster_name_short}-example
 spec:
   ports:
       # port of service
@@ -49,7 +55,7 @@ spec:
       # port of deployment/pod(s) behind service
       targetPort: 8443
   selector:
-    k8s-app: ${cluster_name_short}-example
+    app: ${cluster_name_short}-example
 
 ---
 
@@ -62,7 +68,7 @@ metadata:
   # namespace not req for helm
   namespace: ${namespace_public}
   labels:
-    k8s-app: ${cluster_name_short}-example
+    app: ${cluster_name_short}-example
   annotations:
     # specified because we use an nginx ingress-controller
     kubernetes.io/ingress.class: nginx
