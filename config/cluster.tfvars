@@ -22,19 +22,22 @@ dns_domain_public       = "bifromedia.com"
 
 // URL prefixes for cluster components
 dns_urls = {
-  url_public            = "kareempoc-pub" # primary public alias
+  url_public            = "kareempoc-public" # primary public alias
   url_admiral           = "kareempoc-admiral" # API server alias
   url_etcd              = "kareempoc-etcd" # ETCD cluster alias
-  url_letsencrypt       = "kareempoc-sslmebaby" # for LetsEncrypt
+  url_traefik           = "kareempoc-traefik" # Traefik ingress Dashboard
+  url_whoamidemo        = "kareempoc-whoamidemo" # Demo whoami app, via traefik
+  url_nginxdemo         = "kareempoc-nginxdemo" # Demo Nginx app
+  url_letsencrypt       = "kareempoc-sslmebaby" # for LetsEncrypt (NOT using traefik) <-- TBC
   url_jenkins           = "kareempoc-jenkins" # Jenkins access alias <-- TBC
   url_core_analytics    = "kareempoc-analytics" # Analytics access alias <-- TBC
 }
 
 instance_types = {
   // instance sizes of ec2 instances - may require terraform taint of ASG to update
-  controller            = "m3.medium" // "m1.small" // "m4.large"
-  etcd                  = "m3.medium" // "m1.small" // "m4.large"
-  worker                = "m3.medium" // "m1.small" // "m4.2xlarge"
+  controller            = "m3.medium" // "m3.medium" // "m4.large"
+  etcd                  = "m3.medium" // "m3.medium" // "m4.large"
+  worker                = "m3.medium" // "m3.medium" // "m4.2xlarge"
 
   // grace period in seconds to wait between cycling nodes in ASGs
   controller_wait       = "PT30S" // "PT160S"

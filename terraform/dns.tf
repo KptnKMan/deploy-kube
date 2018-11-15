@@ -19,12 +19,39 @@ resource "aws_route53_record" "public" {
 
 // PROD URLs
 
-// ACC URLs
+## clustername-whoamidemo.mydomain.com (Demo app)
+resource "aws_route53_record" "whoamidemo" {
+  zone_id = "${data.terraform_remote_state.vpc.route53_zone_id}"
+  name    = "${var.dns_urls["url_whoamidemo"]}"
+  type    = "CNAME"
+  ttl     = "5"
+
+  weighted_routing_policy {
+    weight = 10
+  }
+
+  set_identifier = "${var.dns_urls["url_whoamidemo"]}"
+  records        = ["${aws_elb.kubernetes_public_elb.dns_name}"]
+}
 
 // OPS/MGMT URLs
 
-## clustername-admiral.mydomain.com
+## clustername-traefik.mydomain.com
+resource "aws_route53_record" "traefik" {
+  zone_id = "${data.terraform_remote_state.vpc.route53_zone_id}"
+  name    = "${var.dns_urls["url_traefik"]}"
+  type    = "CNAME"
+  ttl     = "5"
 
+  weighted_routing_policy {
+    weight = 10
+  }
+
+  set_identifier = "${var.dns_urls["url_traefik"]}"
+  records        = ["${aws_elb.kubernetes_public_elb.dns_name}"]
+}
+
+## clustername-admiral.mydomain.com
 resource "aws_route53_record" "admiral" {
   zone_id = "${data.terraform_remote_state.vpc.route53_zone_id}"
   name    = "${var.dns_urls["url_admiral"]}"
@@ -36,7 +63,7 @@ resource "aws_route53_record" "admiral" {
   }
 
   set_identifier = "${var.dns_urls["url_admiral"]}"
-  records        = ["${aws_elb.kubernetes_api_elb.dns_name}"]
+  records        = ["${aws_elb.kubernetes_api_elb_public.dns_name}"]
 }
 
 ## clustername-etcd.mydomain.com
@@ -58,6 +85,10 @@ resource "aws_route53_record" "etcd" {
 // Outputs
 output "_connect_bastion_r53" {
   value = "${data.terraform_remote_state.vpc._connect_bastion_r53}"
+}
+
+output "aws_r53_dns_public" {
+  value = "${aws_route53_record.public.fqdn}"
 }
 
 output "aws_r53_dns_admiral" {

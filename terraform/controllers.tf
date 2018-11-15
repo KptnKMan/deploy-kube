@@ -14,7 +14,7 @@ resource "aws_security_group" "controller_sg" {
     to_port         = "${var.kubernetes["api_server_secure_port"]}"
     protocol        = "tcp"
     self            = true
-    security_groups = ["${data.terraform_remote_state.vpc.sg_id_common}","${aws_security_group.kubernetes_controllers_elb_sg.id}"]
+    security_groups = ["${data.terraform_remote_state.vpc.sg_id_common}","${aws_security_group.kubernetes_api_elb_sg.id}"]
   }
 
   // Allow all systems for flannel overlay networking
@@ -64,7 +64,7 @@ data "template_file" "cloud_config_ubuntu_controller" {
     api_server_insecure_port = "${var.kubernetes["api_server_insecure_port"]}"
     etcd_endpoints     = "http://${aws_elb.etcd_elb.dns_name}:2379"
 
-    kubernetes_api_elb = "${aws_elb.kubernetes_api_elb.dns_name}"
+    kubernetes_api_elb_public = "${aws_elb.kubernetes_api_elb_public.dns_name}"
     kubernetes_api_elb_internal = "${aws_elb.kubernetes_api_elb_internal.dns_name}"
 
     apiserver_runtime  = "${var.kubernetes["apiserver_runtime"]}"
@@ -131,7 +131,7 @@ resource "aws_cloudformation_stack" "controller_group" {
       "Properties": {
         "VPCZoneIdentifier": ["${join(",", data.terraform_remote_state.vpc.vpc_subnets_public)}"],
         "LaunchConfigurationName": "${aws_launch_configuration.controller_configuration.name}",
-        "LoadBalancerNames": ["${aws_elb.kubernetes_api_elb.name}", "${aws_elb.kubernetes_api_elb_internal.name}"],
+        "LoadBalancerNames": ["${aws_elb.kubernetes_api_elb_public.name}", "${aws_elb.kubernetes_api_elb_internal.name}"],
         "MinSize": "${var.instances["controller_min"]}",
         "MaxSize": "${var.instances["controller_max"]}",
         "TerminationPolicies": ["OldestLaunchConfiguration", "OldestInstance"],
@@ -193,27 +193,18 @@ EOF
 }
 
 // Security Group for API Controller ELB
-resource "aws_security_group" "kubernetes_controllers_elb_sg" {
+resource "aws_security_group" "kubernetes_api_elb_sg" {
   name        = "${var.cluster_name_short}-sg-elb-api"
   description = "cluster ${var.cluster_name_short} API ELB to API controllers traffic"
   vpc_id      = "${data.terraform_remote_state.vpc.vpc_id}"
 
-  # Allow access to controller from management ips and cluster itself
+  # Allow access to controller secure port from management ips
   ingress {
     from_port   = "${var.kubernetes["api_server_secure_port"]}"
     to_port     = "${var.kubernetes["api_server_secure_port"]}"
     protocol    = "tcp"
     cidr_blocks = [
       "${split(",", data.terraform_remote_state.vpc.management_ips)}",
-    ]
-  }
-
-# Allow incoming HTTPS from management ips
-  ingress {
-    from_port   = "${var.kubernetes["api_server_secure_port"]}"
-    to_port     = "${var.kubernetes["api_server_secure_port"]}"
-    protocol    = "tcp"
-    cidr_blocks = [
       "${split(",", data.terraform_remote_state.vpc.management_ips_personal)}"
     ]
   }
@@ -226,8 +217,8 @@ resource "aws_security_group" "kubernetes_controllers_elb_sg" {
   )}"
 }
 
-// Loadbalancer for controllers
-resource "aws_elb" "kubernetes_api_elb" {
+// PUBLIC Loadbalancer for controllers
+resource "aws_elb" "kubernetes_api_elb_public" {
   name = "${var.cluster_name_short}-elb-api-public"
 
   subnets = ["${data.terraform_remote_state.vpc.vpc_subnets_public}"]
@@ -256,8 +247,9 @@ resource "aws_elb" "kubernetes_api_elb" {
     )
   )}"
 
+  internal                  = false
   cross_zone_load_balancing = true
-  security_groups           = ["${data.terraform_remote_state.vpc.sg_id_common}", "${aws_security_group.kubernetes_controllers_elb_sg.id}"]
+  security_groups           = ["${data.terraform_remote_state.vpc.sg_id_common}", "${aws_security_group.kubernetes_api_elb_sg.id}"]
 }
 
 // Internal loadbalancer for controllers
@@ -297,7 +289,7 @@ resource "aws_elb" "kubernetes_api_elb_internal" {
 
 // Outputs
 output "aws_api_elb_dns_api_public" {
-  value = "${aws_elb.kubernetes_api_elb.dns_name}"
+  value = "${aws_elb.kubernetes_api_elb_public.dns_name}"
 }
 output "aws_api_elb_secure_port" {
   value = "${var.kubernetes["api_server_secure_port"]}"

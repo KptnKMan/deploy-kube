@@ -10,7 +10,7 @@ data "template_file" "kubeconfig_admin" {
 
   vars {
     key_type               = "admin"
-    elb_name               = "${aws_elb.kubernetes_api_elb.dns_name}"
+    elb_name               = "${aws_elb.kubernetes_api_elb_public.dns_name}"
     cluster_name_short     = "${var.cluster_name_short}"
     cluster_domain         = "${var.kubernetes["cluster_domain"]}"
     api_server_secure_port = "${var.kubernetes["api_server_secure_port"]}"
@@ -27,7 +27,7 @@ resource "null_resource" "kubeconfig_admin" {
     // Any change to kubeconfig file triggers
     policy_sha1 = "${sha1(file("terraform/templates/kubeconfig_generic.template"))}"
     // uuid of api_elb
-    "uuid()" = "${aws_elb.kubernetes_api_elb.id}"
+    "uuid()" = "${aws_elb.kubernetes_api_elb_public.id}"
   }
   // Generate kubeconfig template
   provisioner "local-exec" { command = "cat > config/kubeconfig <<EOL\n${data.template_file.kubeconfig_admin.rendered}\nEOL" }
@@ -75,7 +75,7 @@ resource "tls_self_signed_cert" "root_ca" {
     "kubernetes.default.svc",
     "kubernetes.default.svc.${var.kubernetes["cluster_domain"]}",
     "${var.dns_urls["url_admiral"]}.${var.dns_domain_public}",
-    "${aws_elb.kubernetes_api_elb.dns_name}",
+    "${aws_elb.kubernetes_api_elb_public.dns_name}",
     "${aws_elb.kubernetes_api_elb_internal.dns_name}",
     "${var.cluster_name_short}",
     "*.${var.dns_domain_public}",
@@ -178,7 +178,7 @@ resource "tls_cert_request" "api_server_key" {
     "kubernetes.default.svc",
     "kubernetes.default.svc.${var.kubernetes["cluster_domain"]}",
     "${var.dns_urls["url_admiral"]}.${var.dns_domain_public}",
-    "${aws_elb.kubernetes_api_elb.dns_name}",
+    "${aws_elb.kubernetes_api_elb_public.dns_name}",
     "${aws_elb.kubernetes_api_elb_internal.dns_name}",
     "${var.cluster_name_short}",
     "*.${var.dns_domain_public}",
@@ -248,7 +248,7 @@ resource "tls_cert_request" "admin_key" {
     "kubernetes.default.svc",
     "kubernetes.default.svc.${var.kubernetes["cluster_domain"]}",
     "${var.dns_urls["url_admiral"]}.${var.dns_domain_public}",
-    "${aws_elb.kubernetes_api_elb.dns_name}",
+    "${aws_elb.kubernetes_api_elb_public.dns_name}",
     "${aws_elb.kubernetes_api_elb_internal.dns_name}",
     "${var.cluster_name_short}",
     "*.${var.dns_domain_public}",
@@ -317,7 +317,7 @@ resource "tls_cert_request" "worker_key" {
     "kubernetes.default",
     "kubernetes.default.svc",
     "kubernetes.default.svc.${var.kubernetes["cluster_domain"]}",
-    "${aws_elb.kubernetes_api_elb.dns_name}",
+    "${aws_elb.kubernetes_api_elb_public.dns_name}",
     "${aws_elb.kubernetes_api_elb_internal.dns_name}",
     "${var.cluster_name_short}",
     "*.${var.dns_domain_public}",

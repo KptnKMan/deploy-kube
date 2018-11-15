@@ -98,7 +98,7 @@ data "template_file" "cloud_config_ubuntu_worker" {
     api_server_secure_port = "${var.kubernetes["api_server_secure_port"]}"
     api_server_insecure_port = "${var.kubernetes["api_server_insecure_port"]}"
     etcd_endpoints     = "http://${aws_elb.etcd_elb.dns_name}:2379"
-    kubernetes_api_elb = "${aws_elb.kubernetes_api_elb.dns_name}"
+    kubernetes_api_elb_public = "${aws_elb.kubernetes_api_elb_public.dns_name}"
     kubernetes_api_elb_internal = "${aws_elb.kubernetes_api_elb_internal.dns_name}"
 
     cluster_name_short = "${var.cluster_name_short}"

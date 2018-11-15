@@ -13,12 +13,15 @@ resource "random_shuffle" "random_az" {
   result_count = 1
 }
 
-// Define state location of this template (Used for remote state elsewhere)
-terraform {
-  backend "local" {
-    path = "config/cluster.state"
-  }
-}
+// An example of using an S3 backend
+# terraform {
+#   backend "s3" {
+#     bucket  = "BUCKETNAME"
+#     key     = "prod/terraform.tfstate"
+#     region  = "eu-west-1"
+#     encrypt = true
+#   }
+# }
 
 //Outputs
 output "path_module" {
