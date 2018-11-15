@@ -64,7 +64,25 @@ data "template_file" "deploy_demo_nginx" {
 
   vars {
     dns_domain_public  = "${var.dns_domain_public}"
-    url_public         = "${var.dns_urls["url_public"]}"
+    url_app            = "${var.dns_urls["url_public"]}"
+
+    cluster_dns        = "${var.kubernetes["cluster_dns"]}"
+    cluster_domain     = "${var.kubernetes["cluster_domain"]}"
+    namespace_public   = "${var.kubernetes["namespace_public"]}"
+    namespace_system   = "${var.kubernetes["namespace_system"]}"
+
+    cluster_name_short = "${var.cluster_name_short}"
+    cluster_config_location = "${var.cluster_config_location}"
+  }
+}
+
+// Demo Deployment+Service Nginx
+data "template_file" "deploy_demo_traefik_whoami_app" {
+  template = "${file("terraform/templates/deploy_demo_traefik_whoami_app.yaml")}"
+
+  vars {
+    dns_domain_public  = "${var.dns_domain_public}"
+    url_app            = "${var.dns_urls["url_whoamidemo"]}"
 
     cluster_dns        = "${var.kubernetes["cluster_dns"]}"
     cluster_domain     = "${var.kubernetes["cluster_domain"]}"
@@ -105,7 +123,7 @@ data "template_file" "deploy_demo_letsencrypt" {
     ingress_port_https = "${var.kubernetes["ingress_port_https"]}"
 
     domain             = "${var.dns_domain_public}"
-    url_letsencrypt    = "${var.dns_urls["url_letsencrypt"]}"
+    url_app            = "${var.dns_urls["url_letsencrypt"]}"
     letsencrypt_email  = "${var.kubernetes["letsencrypt_email"]}"
     letsencrypt_secret = "${var.kubernetes["letsencrypt_secret"]}"
 
@@ -124,6 +142,7 @@ resource "null_resource" "render_deploys" {
     policy_sha1 = "${sha1(file("terraform/templates/deploy_base_efs_storageclaim.yaml"))}"
     policy_sha1 = "${sha1(file("terraform/templates/deploy_base_ingress_controller.yaml"))}"
     policy_sha1 = "${sha1(file("terraform/templates/deploy_demo_nginx.yaml"))}"
+    policy_sha1 = "${sha1(file("terraform/templates/deploy_demo_traefik_whoami_app.yaml"))}"
     policy_sha1 = "${sha1(file("terraform/templates/deploy_demo_ingress_aws.yaml"))}"
     policy_sha1 = "${sha1(file("terraform/templates/deploy_demo_letsencrypt.yaml"))}"
   }
@@ -135,6 +154,7 @@ resource "null_resource" "render_deploys" {
   provisioner "local-exec" { command = "cat > deploys/deploy_base_efs_storageclaim.yaml <<EOL\n${data.template_file.deploy_base_efs_storageclaim.rendered}\nEOL" }
   provisioner "local-exec" { command = "cat > deploys/deploy_base_ingress_controller.yaml <<EOL\n${data.template_file.deploy_base_ingress_controller.rendered}\nEOL" }
   provisioner "local-exec" { command = "cat > deploys/deploy_demo_nginx.yaml <<EOL\n${data.template_file.deploy_demo_nginx.rendered}\nEOL" }
+  provisioner "local-exec" { command = "cat > deploys/deploy_demo_traefik_whoami_app.yaml <<EOL\n${data.template_file.deploy_demo_traefik_whoami_app.rendered}\nEOL" }
   provisioner "local-exec" { command = "cat > deploys/deploy_demo_ingress_aws.yaml <<EOL\n${data.template_file.deploy_demo_ingress_aws.rendered}\nEOL" }
   provisioner "local-exec" { command = "cat > deploys/deploy_demo_letsencrypt.yaml <<EOL\n${data.template_file.deploy_demo_letsencrypt.rendered}\nEOL" }
 }

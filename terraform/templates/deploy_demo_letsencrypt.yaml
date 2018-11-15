@@ -104,10 +104,10 @@ metadata:
 spec:
   tls:
   - hosts:
-    - ${url_letsencrypt}.${domain} # Your host. CHANGE ME
+    - ${url_app}.${domain} # Your host. CHANGE ME
     secretName: letsencrypt-certs # Name of the secret
   rules:
-  - host: ${url_letsencrypt}.${domain} # CHANGE ME!
+  - host: ${url_app}.${domain} # CHANGE ME!
     http:
       paths:
       # The * is needed so that all traffic gets redirected to nginx
@@ -143,7 +143,7 @@ spec:
           containerPort: 80
         env:
         - name: DOMAINS
-          value: ${url_letsencrypt}.${domain} # Domain you want to use. CHANGE ME!
+          value: ${url_app}.${domain} # Domain you want to use. CHANGE ME!
         - name: EMAIL
           value: ${letsencrypt_email} # Your email. CHANGE ME!
         - name: SECRET

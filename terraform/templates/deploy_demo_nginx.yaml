@@ -75,7 +75,7 @@ metadata:
 spec:
   rules:
     # host and path are combined to effective full external dns path
-  - host: ${url_public}.${dns_domain_public}
+  - host: ${url_app}.${dns_domain_public}
     http:
       paths:
       - path: /s/${cluster_name_short}-example
@@ -86,6 +86,6 @@ spec:
   tls:
   - hosts:
       # specify the dns name the cert is valid for
-    - ${url_public}.${dns_domain_public}
+    - ${url_app}.${dns_domain_public}
     # secret name of the secret resource containing matching cert
     secretName: default-ingress-cert
