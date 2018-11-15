@@ -22,7 +22,10 @@ write_files:
 
       [Service]
       Restart=always
-      RestartSec=20
+      RestartSec=20s
+      RemainAfterExit=no
+      TimeoutStartSec=60
+      TimeoutStopSec=30
 
       LimitNOFILE=1048576
       LimitNPROC=104857
@@ -54,7 +57,11 @@ write_files:
       After=docker-bootstrap.service
 
       [Service]
-      TimeoutStartSec=0
+      Restart=always
+      RestartSec=20s
+      RemainAfterExit=no
+      TimeoutStartSec=60
+      TimeoutStopSec=30
       ExecStartPre=-/sbin/modprobe ip_tables
 
       ExecStartPre=-/usr/bin/docker -H unix:///var/run/docker-bootstrap.sock kill flannel
@@ -79,9 +86,6 @@ write_files:
 
       ExecStop=/usr/bin/docker -H unix:///var/run/docker-bootstrap.sock stop flannel
 
-      Restart=always
-      RestartSec=10
-
       [Install]
       WantedBy=multi-user.target
 
@@ -94,7 +98,10 @@ write_files:
 
       [Service]
       Restart=always
-      RestartSec=30
+      RestartSec=20s
+      RemainAfterExit=no
+      TimeoutStartSec=60
+      TimeoutStopSec=30
 
       EnvironmentFile=/etc/flannel.env
       MountFlags=shared
@@ -125,6 +132,12 @@ write_files:
       Requires=docker.service
 
       [Service]
+      Restart=always
+      RestartSec=20s
+      RemainAfterExit=no
+      TimeoutStartSec=60
+      TimeoutStopSec=30
+
       ExecStartPre=/bin/mkdir -p /opt/cni/bin
       ExecStartPre=/bin/mkdir -p /etc/kubernetes/manifests
       ExecStartPre=/bin/mkdir -p /etc/kubernetes/cni/net.d
@@ -166,9 +179,6 @@ write_files:
         #--fail-swap-on=false
         #--v=2
 
-      Restart=always
-      RestartSec=10
-
       [Install]
       WantedBy=multi-user.target
 
@@ -182,6 +192,12 @@ write_files:
       Requires=docker.service
 
       [Service]
+      Restart=always
+      RestartSec=20s
+      RemainAfterExit=no
+      TimeoutStartSec=60
+      TimeoutStopSec=30
+
       ExecStart=/usr/bin/kube-proxy \
         --config=/etc/kubernetes/kube-proxy.conf
 
@@ -189,9 +205,6 @@ write_files:
         # --kubeconfig=/etc/kubernetes/kubeconfig.yaml \
         # --proxy-mode=iptables \
         # --v=2
-
-      Restart=always
-      RestartSec=10
 
       [Install]
       WantedBy=multi-user.target
@@ -355,6 +368,9 @@ write_files:
       # Environment file
       echo "NODE_FQDN=$NODE_FQDN" >> /etc/environment
       echo "NODE_IP=$NODE_IP" >> /etc/environment
+
+      # Set resolv.conf for Ubuntu 18.04
+      sudo ln -sf /run/systemd/resolve/resolv.conf /etc/resolv.conf
 
 runcmd:
   - apt-get update -qy

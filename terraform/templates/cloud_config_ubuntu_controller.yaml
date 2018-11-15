@@ -9,6 +9,10 @@ write_files:
 
       [Service]
       Restart=always
+      RestartSec=20s
+      RemainAfterExit=no
+      TimeoutStartSec=60
+      TimeoutStopSec=30
 
       ExecStartPre=-/sbin/modprobe ip_tables
       # ETCDv2 set and read
@@ -35,8 +39,11 @@ write_files:
       Requires=flannel.service
 
       [Service]
-      TimeoutStartSec=5
       Restart=always
+      RestartSec=20s
+      RemainAfterExit=no
+      TimeoutStartSec=60
+      TimeoutStopSec=30
 
       EnvironmentFile=/etc/flannel.env
 
@@ -60,8 +67,11 @@ write_files:
       Documentation=https://github.com/GoogleCloudPlatform/kubernetes
 
       [Service]
-      Restart=on-failure
-      RestartSec=5
+      Restart=always
+      RestartSec=20s
+      RemainAfterExit=no
+      TimeoutStartSec=60
+      TimeoutStopSec=30
 
       EnvironmentFile=/etc/environment
 
@@ -105,8 +115,11 @@ write_files:
       Documentation=https://github.com/GoogleCloudPlatform/kubernetes
 
       [Service]
-      Restart=on-failure
-      RestartSec=5
+      Restart=always
+      RestartSec=20s
+      RemainAfterExit=no
+      TimeoutStartSec=60
+      TimeoutStopSec=30
 
       EnvironmentFile=/etc/environment
 
@@ -138,8 +151,11 @@ write_files:
       Documentation=https://github.com/GoogleCloudPlatform/kubernetes
 
       [Service]
-      Restart=on-failure
-      RestartSec=5
+      Restart=always
+      RestartSec=20s
+      RemainAfterExit=no
+      TimeoutStartSec=60
+      TimeoutStopSec=30
 
       EnvironmentFile=/etc/environment
 
@@ -158,8 +174,11 @@ write_files:
       Documentation=https://github.com/GoogleCloudPlatform/kubernetes
 
       [Service]
-      Restart=on-failure
-      RestartSec=5
+      Restart=always
+      RestartSec=20s
+      RemainAfterExit=no
+      TimeoutStartSec=60
+      TimeoutStopSec=30
 
       EnvironmentFile=/etc/environment
 
@@ -296,6 +315,9 @@ write_files:
       sed -i -e "s/{{NODE_IP}}/$NODE_IP/g" /etc/kubernetes/kubeconfig.yaml
       # Complete kube-proxy config file
       sed -i -e "s/{{NODE_IP}}/$NODE_IP/g" /etc/kubernetes/kube-proxy.conf
+
+      # Set resolv.conf for Ubuntu 18.04
+      sudo ln -sf /run/systemd/resolve/resolv.conf /etc/resolv.conf
 
 runcmd:
   - apt-get update -qy
