@@ -18,7 +18,7 @@ s3_backup_bucket        = "kareempoc-backup"
 s3_state_bucket         = "kareempoc-state"
 
 // primary dns domain, aka route53 hosted zone / dns domain / etc
-dns_domain_public       = "bifromedia.com"
+dns_domain_public       = "mydomain.com"
 
 // URL prefixes for cluster components
 dns_urls = {
