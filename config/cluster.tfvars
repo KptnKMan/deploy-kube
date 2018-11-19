@@ -65,13 +65,13 @@ kubernetes {
   docker_version        = "18.03.0" # 17.03.0 # 17.03.1 # 17.03.2 # 17.06.0 # 17.06.1 # 17.06.2
                                     # 17.09.0 # 17.09.1 # 17.12.0 # 17.12.1
                                     # 18.03.0 # 18.03.1 # 18.06.0
-  kube_version          = "1.10.6" # 1.9.10 # 1.10.6 # 1.11.1
+  kube_version          = "1.12.2" # 1.9.10 # 1.10.10 # 1.11.4 # 1.12.2
   flannel_version       = "0.10.0" # 0.5.5 # 0.6.2 # 0.7.1 # 0.8.0 # 0.9.1 # 0.10.0
   
   // do not change these after cluster build
   // ETCD version used for ETCDCTL installation
   etcd_version          = "3.2.24" # "3.2.20" # "3.2.24" # v3.3.9"
-  etcd_elb_internal     = true # if the single ELB should be internal (true) or public (false)
+  etcd_elb_internal     = true # if the single ETCD ELB should be internal (true) or public (false)
 
   // do not change these after cluster build
   // supported API runtimes of api-server on master/controller - keep on 1 line
