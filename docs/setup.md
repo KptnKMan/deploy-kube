@@ -11,7 +11,27 @@ This doc is intended to:
 
 ## Setup Tools
 
+### Setup Terraform
+
 Follow details in [this part of the base vpc template setup doc](https://github.com/KptnKMan/deploy-vpc-aws/blob/master/docs/setup.md#setup-tools).
+
+### Setup kubectl
+
+Linux:
+```
+sudo curl -L https://storage.googleapis.com/kubernetes-release/release/v1.12.2/bin/linux/amd64/kubectl -o /usr/bin/kubectl
+sudo chmod +x /usr/bin/kubectl
+```
+MacOS:
+```
+sudo curl -L https://storage.googleapis.com/kubernetes-release/release/v1.12.2/bin/darwin/amd64/kubectl -o /usr/local/bin/kubectl
+sudo chmod +x /usr/local/bin/kubectl
+```
+Windows:
+```
+Invoke-WebRequest -Uri http://storage.googleapis.com/kubernetes-release/release/v1.12.2/bin/windows/amd64/kubectl.exe -Outfile $HOME\Downloads\kubectl.exe
+Move-Item $HOME\Downloads\kubectl.exe $env:SystemRoot
+```
 
 ## Setup Environment Variables
 

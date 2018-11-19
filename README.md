@@ -13,7 +13,7 @@ It contains:
 * [x] Deployment Kubernetes Cluster
 * [x] Default configuration and settings to build environment
 * [x] Scripts to create, update and cleanup infrastructure
-* [ ] Demo details of things to do with Kubernetes
+* [x] Demo details of things to do with Kubernetes
 
 Additional documentation for setup can be found in [docs](docs), when they become available.
 
@@ -25,8 +25,8 @@ After following the setup docs, you may want to check the [demo deploys doc](doc
 
 ## Basic Requirements
 
-* kubectl 1.10.6+
-* Terraform 0.11.7
+* kubectl 1.12.2+
+* Terraform 0.11.7+
 * ~~Ansible 2.4.1.0+~~
 * An AWS Account.
   * No special AWS limits are required.
@@ -115,7 +115,7 @@ It is not recommended to change core cluster functionality and references after 
 
 Versions tested:
 
-* kubectl: 1.10.6 In testing: 1.11.x
+* kubectl: 1.12.2 In testing: 1.13.x
 * terraform: 0.8.8 upto 0.11.7
 * ~~ansible-playbook: 2.2.1.0, 2.4.1.0~~
 
@@ -136,43 +136,52 @@ Terraform Inputs:
   * [x] translate SSL provisioning to terraform native
   * [x] terraform provision instance SSH keypair
   * [ ] LetsEncrypt-enabled host-based routing working
+    * [ ] ingress demo - Nginx + LetsEncrypt
+    * [x] ingress demo - Traefik
 * documentation
   * [x] setup doc with example cli commands
-  * [ ] demo doc with example cli commands
-  * [ ] Create working demo of Kube services including ELB-ingress
+  * [x] demo doc with example cli commands
+  * [x] Create working demo of Kube services including ELB-ingress
     * [x] core services - kube-dns, dashboard & efs-storage
-    * [ ] ingress demo - basic
+    * [x] ingress demo - Nginx
+    * [x] ingress demo - Traefik
     * [ ] ingress demo - host-based routing
     * [ ] ingress demo - kube-ingress-aws
-      * [ ] kube-ingress-aws IAM policy
 * etcd concerns
   * [x] resolve etcd provisioning
   * [ ] all etcd communication using TLS certs
   * [ ] rebuild etcd image with open logic
   * [x] etcd-aws-py docker-image ready
-    * [x] update etcd to latest 3.x+
-    * [ ] etcd 3.x backups
+    * [x] update etcd to latest 3.2.x+
+    * [ ] update etcd to latest 3.3.x+
+    * [ ] etcd 3.x auto-backups
+    * [ ] etcd 3.x auto-restores
   * [ ] etcd-aws-go docker-image ready
     * [ ] update etcd to latest 3.x+
-    * [ ] etcd 3.x backups
+    * [ ] etcd 3.x auto-backups
+    * [ ] etcd 3.x auto-restores
 * kubernetes
-  * [x] update kube to latest 1.8.x
-  * [x] update kube to latest 1.10.6 stable
-  * [ ] update kube to latest 1.10.x stable (1.10.7)
-  * [ ] update kube to latest 1.11.x stable (1.11.2)
-  * [ ] update kube to latest 1.x.x beta (1.12.0-beta.0)
-  * [ ] update kube to latest 1.x.x alpha (1.13.0-alpha.0)
+  * [x] versions working/tested
+    * [x] confirm working on kube 1.9.10 stable
+    * [x] confirm working on kube 1.10.10 stable
+    * [x] confirm working on kube 1.11.4 stable
+    * [x] confirm working on kube 1.12.2 stable
+    * [ ] update/test kube to latest 1.x.x alpha/beta (1.13.0-beta.1)
   * [ ] cluster autoscaling (cluster-autoscaler?) (kube-aws-autoscaler?)
     * [ ] autoscaler IAM policy
   * [x] figure out friggin v1.8.x RBAC!
   * [ ] RBAC: get basic roles organised/documented
   * [x] RBAC: get kubelet node role organised (requires deploy-time provisioning certs)
+  * [ ] Helm: Documented secure Helm install
+  * [ ] Rancher: Documented secure Rancher install
 * terraform
   * [x] update terraform to latest 10.x
   * [ ] update terraform to latest 11.x
   * [ ] Fix some terraform code inconstencies
   * [ ] translate etcd/controller/worker ASGs to terraform native
 * AWS-specific
+  * [x] Traefik ingress demo - AWS Route53 policy
+  * [ ] Nginx ingress demo - kube-ingress-aws IAM policy
   * [ ] all security groups tightened
   * [ ] secure ability to expose API server for multi-cloud
   * [ ] test multi-cloud deployment
@@ -181,4 +190,7 @@ Terraform Inputs:
 * Google-specific
   * [ ] develop multi-cloud extension
 * other
-  * [x] FYI: Kube 1.8.x worker kubelet requires "--kube-swap-on=false" as swap is undesired.
+  * [x] confirm working on Ubuntu 16.04
+  * [x] confirm working on Ubuntu 18.04
+    * FYI: Ubuntu 18.04 changes DNS, requires `sudo ln -sf /run/systemd/resolve/resolv.conf /etc/resolv.conf`
+  * [x] FYI: Kube 1.8.x worker kubelet swap is undesired, requires `--kube-swap-on=false`

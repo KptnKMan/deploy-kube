@@ -24,14 +24,25 @@ This demo installation requires a few tools:
 
 ## TL:DR commands
 
+Note: This assumes AWS Route53, and you will need to change these params below:
+
+* `dashboard.domain`
+* `acme.email`
+* `staging`
+* `acme.domains.domainList.main`
+* `acme.domains.domainList.sans`
+
 If you just want to copy/paste all the commands, here they are:
 
 ```bash
+# deploy base templates
 kubectl --kubeconfig=config/kubeconfig apply -f deploys/deploy_base_kubedns.yaml
 kubectl --kubeconfig=config/kubeconfig apply -f deploys/deploy_base_dashboard.yaml
 kubectl --kubeconfig=config/kubeconfig apply -f deploys/deploy_base_efs_storageclaim.yaml
-kubectl --kubeconfig config/kubeconfig apply -f deploys/deploy_demo_traefik_whoami_app.yaml
 helm init
+kubectl --kubeconfig config/kubeconfig apply -f deploys/deploy_demo_traefik_whoami_app.yaml
+
+# wait ~20 seconds and deploy ingress using helm
 helm install stable/traefik \
 --name traefik-ingress \
 --set imageTag=1.7.4,\
@@ -85,6 +96,9 @@ kubectl --kubeconfig config/kubeconfig apply -f deploys/deploy_base_ingress_cont
 
 ##### Traefik Ingress using Helm
 
+https://docs.traefik.io/configuration/acme/#wildcard-domain
+https://docs.traefik.io/user-guide/examples/#lets-encrypt-support
+https://docs.traefik.io/basics/
 Traefik whoami demo app (optional):
 
 ```bash
@@ -101,7 +115,7 @@ helm install stable/traefik \
     --name traefik-ingress
 ```
 
-With LetsEncrypt:
+With LetsEncrypt, using AWS Route53 DNS:
 
 ```bash
 helm install stable/traefik \
