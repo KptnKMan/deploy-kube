@@ -22,7 +22,7 @@ dns_domain_public       = "mydomain.com"
 
 // URL prefixes for cluster components
 dns_urls = {
-  url_public            = "kareempoc-public" # primary public alias
+  url_public            = "*" # primary public alias
   url_admiral           = "kareempoc-admiral" # API server alias
   url_etcd              = "kareempoc-etcd" # ETCD cluster alias
   url_traefik           = "kareempoc-traefik" # Traefik ingress Dashboard
