@@ -1,0 +1,28 @@
+## This Certificate is used by the Issuer/ClusterIssuer to create a new cert.
+# https://cert-manager.readthedocs.io/en/latest/reference/certificates.html
+
+---
+
+apiVersion: certmanager.k8s.io/v1alpha1
+kind: Certificate
+metadata:
+  name: "wildcard.${dns_domain_public}"
+  namespace: ${namespace_public}
+spec:
+  # name for generated cert to be stored
+  secretName: "wildcard.${dns_domain_public}-tls-cert"
+  issuerRef:
+    name: ${letsencrypt_issuer}
+    kind: ClusterIssuer
+  commonName: "${url_wildcard}.${dns_domain_public}"
+  dnsNames:
+  - "${url_wildcard}.${dns_domain_public}"
+  acme:
+    config:
+    - dns01:
+        ingressClass: nginx
+        provider: route53
+      domains:
+      - "${url_wildcard}.${dns_domain_public}"
+      - "${url_app}.${dns_domain_public}"
+      - "${dns_domain_public}"

@@ -1,0 +1,98 @@
+## Demo for whoami app
+---
+apiVersion: extensions/v1beta1
+kind: Deployment
+metadata:
+  name: whoami-deployment
+  namespace: ${namespace_public}
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: whoami
+  template:
+    metadata:
+      labels:
+        app: whoami
+    spec:
+      containers:
+      - name: whoami-container
+        image: containous/whoami
+        ports:
+        - containerPort: 80
+          protocol: TCP
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: whoami-service
+  namespace: ${namespace_public}
+spec:
+  ports:
+  - name: http
+    targetPort: 80
+    port: 80
+  selector:
+    app: whoami
+---
+# Traefik Ingress, works with traefik ingress controller
+apiVersion: extensions/v1beta1
+kind: Ingress
+metadata:
+  name: whoami-ingress-traefik
+  namespace: ${namespace_public}
+  annotations:
+    kubernetes.io/ingress.class: traefik
+spec:
+  rules:
+  - host: ${url_public}.${dns_domain_public}
+    http:
+      paths:
+      - path: /
+        backend:
+          serviceName: whoami-service
+          servicePort: http
+  - host: ${url_app_traefik}.${dns_domain_public}
+    http:
+      paths:
+      - path: /
+        backend:
+          serviceName: whoami-service
+          servicePort: http
+---
+# Nginx Ingress, works with nginx ingress controller
+# Read more at: https://cert-manager.readthedocs.io/en/latest/reference/ingress-shim.html
+apiVersion: extensions/v1beta1
+kind: Ingress
+metadata:
+  name: whoami-ingress-nginx
+  namespace: ${namespace_public}
+  annotations:
+    # specify the ingress class/type to use
+    kubernetes.io/ingress.class: nginx
+    # add an annotation indicating the issuer to use.
+    certmanager.k8s.io/cluster-issuer: ${letsencrypt_issuer}
+spec:
+  rules:
+  # test public primary domain
+  - host: ${url_public}.${dns_domain_public}
+    http:
+      paths:
+      - path: /
+        backend:
+          serviceName: whoami-service
+          servicePort: http
+  # test public custom sub-domain
+  - host: ${url_app_nginx}.${dns_domain_public}
+    http:
+      paths:
+      - path: /
+        backend:
+          serviceName: whoami-service
+          servicePort: http
+  # This section is only required if TLS is to be enabled for the Ingress
+  tls: # < placing a host in the TLS config will indicate a cert should be created
+  - hosts:
+    - "${url_wildcard}.${dns_domain_public}"
+    # cert-manager will store the created certificate in this secret.
+    secretName: "wildcard.${dns_domain_public}-tls-cert"
