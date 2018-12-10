@@ -1,8 +1,24 @@
 // CONFIGURE ROUTE53 DNS ZONE
 # Zone is configured in root template
 
-// Primary www
+// PROD URLs
 
+## Primary '*.mydomain.com' -> 'AWS ELB DNS ADDRESS'
+resource "aws_route53_record" "public_wildcard" {
+  zone_id = "${data.terraform_remote_state.vpc.route53_zone_id}"
+  name    = "${var.dns_urls["wildcard"]}"
+  type    = "CNAME"
+  ttl     = "5"
+
+  weighted_routing_policy {
+    weight = 10
+  }
+
+  set_identifier = "${var.dns_urls["wildcard"]}"
+  records        = ["${aws_elb.kubernetes_public_elb.dns_name}"]
+}
+
+## Primary 'www.mydomain.com' -> 'AWS ELB DNS ADDRESS'
 resource "aws_route53_record" "public" {
   zone_id = "${data.terraform_remote_state.vpc.route53_zone_id}"
   name    = "${var.dns_urls["url_public"]}"
@@ -17,10 +33,9 @@ resource "aws_route53_record" "public" {
   records        = ["${aws_elb.kubernetes_public_elb.dns_name}"]
 }
 
-// PROD URLs
-
 // OPS/MGMT URLs
 
+## 'clustername-etcd.mydomain.com' -> ETCD API ELB
 resource "aws_route53_record" "etcd" {
   zone_id = "${data.terraform_remote_state.vpc.route53_zone_id}"
   name    = "${var.dns_urls["url_etcd"]}"
@@ -35,7 +50,7 @@ resource "aws_route53_record" "etcd" {
   records        = ["${aws_elb.etcd_elb.dns_name}"]
 }
 
-## clustername-admiral.mydomain.com
+## 'clustername-admiral.mydomain.com' -> CONTROLLER API ELB
 resource "aws_route53_record" "admiral" {
   zone_id = "${data.terraform_remote_state.vpc.route53_zone_id}"
   name    = "${var.dns_urls["url_admiral"]}"
@@ -49,8 +64,6 @@ resource "aws_route53_record" "admiral" {
   set_identifier = "${var.dns_urls["url_admiral"]}"
   records        = ["${aws_elb.kubernetes_api_elb_public.dns_name}"]
 }
-
-## clustername-etcd.mydomain.com
 
 // Outputs
 output "_connect_bastion_r53" {

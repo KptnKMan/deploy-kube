@@ -22,15 +22,17 @@ dns_domain_public       = "mydomain.com"
 
 // URL prefixes for cluster components
 dns_urls = {
-  url_public            = "*" # primary public alias
+  wildcard              = "*" # primary dns wildcard CNAME (Usually "*"), that will point to "url_public" or Public_elb
+  url_public            = "kareempoc-public" # primary public alias (Usually "www"), points to public ELB
   url_admiral           = "kareempoc-admiral" # API server alias
   url_etcd              = "kareempoc-etcd" # ETCD cluster alias
   url_traefik           = "kareempoc-traefik" # Traefik ingress Dashboard
-  url_whoamidemo        = "kareempoc-whoamidemo" # Demo whoami app, via traefik
+  url_whoami_traefik    = "kareempoc-whoami-traefik" # Demo whoami app, via traefik
+  url_whoami_nginx      = "kareempoc-whoami-nginx" # Demo whoami app, via traefik
   url_nginxdemo         = "kareempoc-nginxdemo" # Demo Nginx app
   url_letsencrypt       = "kareempoc-sslmebaby" # for LetsEncrypt (NOT using traefik) <-- TBC
   url_jenkins           = "kareempoc-jenkins" # Jenkins access alias <-- TBC
-  url_core_analytics    = "kareempoc-analytics" # Analytics access alias <-- TBC
+  url_analytics         = "kareempoc-analytics" # Analytics access alias <-- TBC
 }
 
 instance_types = {
@@ -64,13 +66,14 @@ kubernetes {
   // https://github.com/kubernetes/kubernetes/blob/release-1.10/test/e2e_node/jenkins/image-config.yaml
   docker_version        = "18.03.0" # 17.03.0 # 17.03.1 # 17.03.2 # 17.06.0 # 17.06.1 # 17.06.2
                                     # 17.09.0 # 17.09.1 # 17.12.0 # 17.12.1
-                                    # 18.03.0 # 18.03.1 # 18.06.0
-  kube_version          = "1.12.2" # 1.9.10 # 1.10.10 # 1.11.4 # 1.12.2
+                                    # 18.03.0 # 18.03.1 <- kube 1.12.x
+                                    # 18.06.0 # 18.09.0 <- kube 1.13.x
+  kube_version          = "1.12.2" # 1.9.10 # 1.10.10 # 1.11.4 # 1.12.2 # 1.13.0
   flannel_version       = "0.10.0" # 0.5.5 # 0.6.2 # 0.7.1 # 0.8.0 # 0.9.1 # 0.10.0
   
   // do not change these after cluster build
   // ETCD version used for ETCDCTL installation
-  etcd_version          = "3.2.24" # "3.2.20" # "3.2.24" # v3.3.9"
+  etcd_version          = "3.2.25" # "3.1.20" # "3.2.24" # "3.2.25" # v3.3.10"
   etcd_elb_internal     = true # if the single ETCD ELB should be internal (true) or public (false)
 
   // do not change these after cluster build
@@ -100,9 +103,10 @@ kubernetes {
   public_elb_port_https = "443" # port public ELB exposes to internet
   public_elb_cidr       = "0.0.0.0/0" # IP range public ELB exposes to internet, limit to "you.rpu.bli.cip/32" if you want only you.
 
-  // Extra management IP - Leave blank or add full CIDR here (Eg: 1.1.1.1/1,2.2.2.2/2 comma separated, no spaces)
-  letsencrypt_email     = "some.email@myemail.com" # Your email used for LetsEncrypt
-  letsencrypt_secret    = "deez-certs" # Password used for LetsEncrypt
+  // Details for using LetsEncrypt auto-TLS
+  letsencrypt_email     = "some.email@mydomain.com" # Your email used for LetsEncrypt
+  letsencrypt_secret    = "get-deez-certs" # secret name used for LetsEncrypt
+  letsencrypt_issuer    = "letsencrypt-staging" # letsencrypt-staging or letsencrypt-prod
 }
 
 // Common Tags for all resources in deployment

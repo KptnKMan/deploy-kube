@@ -2,6 +2,11 @@
 // Variables here are used if no variable is set elsewhere
 // Variables here are overriden by the deploy variables file
 
+variable cluster_config_location {
+  type                    = "string"
+  default                 = "config"
+}
+
 variable "aws_access_key" {
   type                    = "string"
 }
@@ -17,7 +22,7 @@ variable "aws_region" {
 
 variable "cluster_name" {
   type                    = "string"
-  default                 = "kareempoc"
+  default                 = "Kareem POC Deployment"
 }
 
 variable "cluster_name_short" {
@@ -43,12 +48,17 @@ variable "dns_domain_public" {
 variable "dns_urls" {
   type = "map"
   default = {
-    url_public            = "*"
+    wildcard              = "*"
+    url_public            = "kareempoc-public"
     url_admiral           = "kareempoc-admiral"
     url_etcd              = "kareempoc-etcd"
+    url_traefik           = "kareempoc-traefik"
+    url_whoami_traefik    = "kareempoc-whoami-traefik"
+    url_whoami_nginx      = "kareempoc-whoami-nginx"
+    url_nginxdemo         = "kareempoc-nginxdemo"
     url_letsencrypt       = "kareempoc-sslmebaby"
     url_jenkins           = "kareempoc-jenkins"
-    url_core_analytics    = "kareempoc-analytics"
+    url_analytics         = "kareempoc-analytics"
   }
 }
 
@@ -82,10 +92,10 @@ variable "instances" {
 variable "kubernetes" {
   type = "map"
   default = {
-    docker_version        = "18.3.0"
-    kube_version          = "1.10.6"
+    docker_version        = "18.3.1"
+    kube_version          = "1.12.2"
     flannel_version       = "0.10.0"
-    etcd_version          = "3.2.24"
+    etcd_version          = "3.2.25"
     etcd_elb_internal     = true
 
     apiserver_runtime     = "api/all=true"
@@ -94,8 +104,8 @@ variable "kubernetes" {
 
     flannel_network       = "192.168.0.0/16"
     service_ip_range      = "10.5.0.0/24"
-    service_ip            = "10.4.0.1"
-    cluster_dns           = "10.4.0.10"
+    service_ip            = "10.5.0.1"
+    cluster_dns           = "10.5.0.10"
     cluster_domain        = "kareempoc.local"
     api_server_secure_port   = "6443"
     api_server_insecure_port = "8080"
@@ -109,8 +119,9 @@ variable "kubernetes" {
     public_elb_port_https = "443"
     public_elb_cidr       = "0.0.0.0/0"
 
-    letsencrypt_email     = "some.email@myemail.com"
-    letsencrypt_secret    = "deez-certs"
+    letsencrypt_email     = "some.email@mydomain.com"
+    letsencrypt_secret    = "get-deez-certs"
+    letsencrypt_issuer    = "letsencrypt-staging"
   }
 }
 
@@ -132,8 +143,4 @@ variable "efs_storage" {
     performance_mode      = "generalPurpose"
     encrypted             = "true"
   }
-}
-
-variable cluster_config_location {
-  type                    = "string"
 }
