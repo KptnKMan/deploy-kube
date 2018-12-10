@@ -11,6 +11,24 @@ data "template_file" "deploy_base_kubedns" {
   }
 }
 
+// CoreDNS for cluster config - CoreDNS is default in 1.13+
+data "template_file" "deploy_base_coredns" {
+  template = "${file("terraform/templates/deploy_base_coredns.yaml")}"
+
+  vars {
+    cluster_dns_ip     = "${var.kubernetes["cluster_dns"]}"
+    cluster_domain     = "${var.kubernetes["cluster_domain"]}"
+
+    reverse_cidrs      = "in-addr.arpa ip6.arpa"
+    stubdomains        = ""
+    federations        = ""
+    upstreamnameserver = "/etc/resolv.conf"
+
+    cluster_name_short = "${var.cluster_name_short}"
+    cluster_config_location = "${var.cluster_config_location}"
+  }
+}
+
 // Kube Dashboard for cluster config
 data "template_file" "deploy_base_dashboard" {
   template = "${file("terraform/templates/deploy_base_dashboard.yaml")}"
@@ -64,6 +82,7 @@ resource "null_resource" "render_deploys" {
     # filename = "test-${uuid()}"
     // Any change to deploy templates triggers regeneration
     policy_sha1 = "${sha1(file("terraform/templates/deploy_base_kubedns.yaml"))}"
+    policy_sha1 = "${sha1(file("terraform/templates/deploy_base_coredns.yaml"))}"
     policy_sha1 = "${sha1(file("terraform/templates/deploy_base_dashboard.yaml"))}"
     policy_sha1 = "${sha1(file("terraform/templates/deploy_base_efs_storageclaim.yaml"))}"
     policy_sha1 = "${sha1(file("terraform/templates/deploy_base_ingress_controller.yaml"))}"
@@ -72,6 +91,7 @@ resource "null_resource" "render_deploys" {
   provisioner "local-exec" { command = "mkdir -p deploys" }
   // Render deploy templates to file
   provisioner "local-exec" { command = "cat > deploys/deploy_base_kubedns.yaml <<EOL\n${data.template_file.deploy_base_kubedns.rendered}\nEOL" }
+  provisioner "local-exec" { command = "cat > deploys/deploy_base_coredns.yaml <<EOL\n${data.template_file.deploy_base_coredns.rendered}\nEOL" }
   provisioner "local-exec" { command = "cat > deploys/deploy_base_dashboard.yaml <<EOL\n${data.template_file.deploy_base_dashboard.rendered}\nEOL" }
   provisioner "local-exec" { command = "cat > deploys/deploy_base_efs_storageclaim.yaml <<EOL\n${data.template_file.deploy_base_efs_storageclaim.rendered}\nEOL" }
   provisioner "local-exec" { command = "cat > deploys/deploy_base_ingress_controller.yaml <<EOL\n${data.template_file.deploy_base_ingress_controller.rendered}\nEOL" }
