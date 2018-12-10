@@ -158,24 +158,20 @@ resource "null_resource" "render_demo_deploys" {
 #   value = "deploy nginx demo using: kubectl --kubeconfig config/kubeconfig apply -f deploys/deploy_base_ingress_controller.yaml"
 # }
 
-output "__post_deploy_config_4a" {
-  value = "deploy helm using: helm init"
-}
-
 output "__post_deploy_config_4b" {
-  value = "deploy ingress demo app using: kubectl --kubeconfig config/kubeconfig apply -f deploys/deploy_demo_whoami_app.yaml"
+  value = "helm: helm init"
 }
-
-# output "__post_deploy_config_5th_ADVANCED" {
-#   value = "deploy Kube BASE using: ansible-playbook ../deploy-kube-base/scripts/deploy-base.yaml"
-# }
 
 output "__post_deploy_config_5a" {
-  value = "deploy (OPTION 1) traefik ingress using: helm install stable/traefik --name traefik-ingress --namespace ${var.kubernetes["namespace_system"]} --set imageTag=1.7.4,dashboard.enabled=true,dashboard.domain=${var.dns_urls["url_traefik"]}.${var.dns_domain_public},service.nodePorts.http=${var.kubernetes["ingress_port_http"]},service.nodePorts.https=${var.kubernetes["ingress_port_https"]},serviceType=NodePort,ssl.enabled=true,ssl.enforced=false,acme.enabled=true,acme.challengeType=dns-01,acme.dnsProvider.name=route53,acme.email=${var.kubernetes["letsencrypt_email"]},acme.staging=true,acme.logging=enabled,acme.domains.enabled=true,acme.domains.domainList.main=${var.dns_urls["url_public"]}.${var.dns_domain_public},acme.domains.domainList.sans=${var.dns_domain_public},acme.persistence.enabled=false"
+  value = "ingress-demo-app: kubectl --kubeconfig config/kubeconfig apply -f deploys/deploy_demo_whoami_app.yaml"
 }
 
 output "__post_deploy_config_5b" {
-  value = "deploy (OPTION 2) nginx ingress using: helm install stable/nginx-ingress --name nginx-ingress --namespace ${var.kubernetes["namespace_system"]} --set image.tag=0.20.0,controller.service.type=NodePort,controller.service.nodePorts.http=${var.kubernetes["ingress_port_http"]},controller.service.nodePorts.https=${var.kubernetes["ingress_port_https"]},ServiceAccount.Create=true,rbac.create=true"
+  value = "(OPTION 1) traefik ingress: helm install stable/traefik --name traefik-ingress --namespace ${var.kubernetes["namespace_system"]} --set imageTag=1.7.4,dashboard.enabled=true,dashboard.domain=${var.dns_urls["url_traefik"]}.${var.dns_domain_public},service.nodePorts.http=${var.kubernetes["ingress_port_http"]},service.nodePorts.https=${var.kubernetes["ingress_port_https"]},serviceType=NodePort,ssl.enabled=true,ssl.enforced=false,acme.enabled=true,acme.challengeType=dns-01,acme.dnsProvider.name=route53,acme.email=${var.kubernetes["letsencrypt_email"]},acme.staging=true,acme.logging=enabled,acme.domains.enabled=true,acme.domains.domainList.main=${var.dns_urls["url_public"]}.${var.dns_domain_public},acme.domains.domainList.sans=${var.dns_domain_public},acme.persistence.enabled=false"
+}
+
+output "__post_deploy_config_5c" {
+  value = "(OPTION 2) nginx ingress: helm install stable/nginx-ingress --name nginx-ingress --namespace ${var.kubernetes["namespace_system"]} --set image.tag=0.20.0,controller.service.type=NodePort,controller.service.nodePorts.http=${var.kubernetes["ingress_port_http"]},controller.service.nodePorts.https=${var.kubernetes["ingress_port_https"]},ServiceAccount.Create=true,rbac.create=true"
 }
 
 # the following additional helm "set" options can be added, but not required:
@@ -186,13 +182,17 @@ output "__post_deploy_config_5b" {
 # https://github.com/jetstack/cert-manager/pull/750
 # https://github.com/jetstack/cert-manager/issues/760
 output "__post_deploy_config_6a" {
-  value = "deploy (OPTION 2) cert-mgr for nginx ingress using: helm install stable/cert-manager --name cert-manager --namespace ${var.kubernetes["namespace_system"]} --set image.tag=v0.4.1,rbac.create=true,serviceAccount.create=true"
+  value = "(OPTION 2) cert-mgr: helm install stable/cert-manager --name cert-manager --namespace ${var.kubernetes["namespace_system"]} --set image.tag=v0.4.1,rbac.create=true,serviceAccount.create=true"
 }
 
 output "__post_deploy_config_6b" {
-  value = "deploy (OPTION 2) cert-manager issuer: kubectl --kubeconfig config/kubeconfig apply -f deploys/deploy_demo_certmgr_issuer.yaml"
+  value = "(OPTION 2) cert-manager issuer: kubectl --kubeconfig config/kubeconfig apply -f deploys/deploy_demo_certmgr_issuer.yaml"
 }
 
 output "__post_deploy_config_6c" {
-  value = "deploy (OPTION 2) cert-manager issuer: kubectl --kubeconfig config/kubeconfig apply -f deploys/deploy_demo_certmgr_certreq.yaml"
+  value = "(OPTION 2) cert-manager certreq: kubectl --kubeconfig config/kubeconfig apply -f deploys/deploy_demo_certmgr_certreq.yaml"
 }
+
+# output "__post_deploy_config_5th_ADVANCED" {
+#   value = "Kube BASE: ansible-playbook ../deploy-kube-base/scripts/deploy-base.yaml"
+# }

@@ -99,13 +99,21 @@ resource "null_resource" "render_deploys" {
 
 // Outputs
 output "__post_deploy_config_1st" {
-  value = "deploy kubedns using: kubectl --kubeconfig config/kubeconfig apply -f deploys/deploy_base_kubedns.yaml"
+  value = "deploy kubedns or coredns!"
 }
 
-output "__post_deploy_config_2nd" {
-  value = "deploy dashboard using: kubectl --kubeconfig config/kubeconfig apply -f deploys/deploy_base_dashboard.yaml"
+output "__post_deploy_config_2a" {
+  value = "(OPTION 1) kubedns: kubectl --kubeconfig config/kubeconfig apply -f deploys/deploy_base_kubedns.yaml"
 }
 
-output "__post_deploy_config_3rd" {
-  value = "deploy EFS storage using: kubectl --kubeconfig config/kubeconfig apply -f deploys/deploy_base_efs_storageclaim.yaml"
+output "__post_deploy_config_2b" {
+  value = "(OPTION 2) coredns: kubectl --kubeconfig config/kubeconfig apply -f deploys/deploy_base_coredns.yaml"
+}
+
+output "__post_deploy_config_3" {
+  value = "dashboard: kubectl --kubeconfig config/kubeconfig apply -f deploys/deploy_base_dashboard.yaml"
+}
+
+output "__post_deploy_config_4a" {
+  value = "EFS-storage: kubectl --kubeconfig config/kubeconfig apply -f deploys/deploy_base_efs_storageclaim.yaml"
 }
