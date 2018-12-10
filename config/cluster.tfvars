@@ -2,6 +2,15 @@
 // Variables here override the default variables file
 // Variables here are overriden by command line and ENV variables at runtime
 
+// Configure where to store config files, like state
+# project_config_location = "config"
+
+// Set AWS credentials and region
+// Put these in here if you are not using ENV VARs
+# aws_access_key          = "reYOURACCESSKEYHEREg"
+# aws_secret_key          = "rePUTYOURSUPERSECRETHERETHISISANEXAMPLEr"
+# aws_region              = "eu-west-1"
+
 // Set AWS region
 aws_region              = "eu-west-1"
 
