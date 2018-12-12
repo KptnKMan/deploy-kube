@@ -7,8 +7,8 @@ rm -Rf config/ssl
 rm -Rf config/kubeconfig
 
 ## Delete terraform state files
-rm -Rf config/cluster.state
-rm -Rf config/cluster.state.backup
+rm -Rf terraform.tfstate
+rm -Rf terraform.tfstate.backup
 
 ## Delete deploys
 rm -Rf deploys

@@ -7,9 +7,9 @@
 
 // Set AWS credentials and region
 // Put these in here if you are not using ENV VARs
-aws_access_key          = "reYOURACCESSKEYHEREg"
-aws_secret_key          = "rePUTYOURSUPERSECRETHERETHISISANEXAMPLEr"
-aws_region              = "eu-west-1"
+# aws_access_key          = "reYOURACCESSKEYHEREg"
+# aws_secret_key          = "rePUTYOURSUPERSECRETHERETHISISANEXAMPLEr"
+# aws_region              = "eu-west-1"
 
 // Name of cluster, used for tagging
 # cluster_name            = "Kareem POC Deployment"
@@ -58,12 +58,12 @@ instance_types = {
 
 // ASG sizing
 instances = {
-  controller_min        = 1 # 1 // Do not modify
-  controller_max        = 1 # 1 // Do not modify
-  etcd_min              = 1 # 3 // Do not modify
-  etcd_max              = 1 # 4 // Do not modify
-  worker_min            = 1 # 3
-  worker_max            = 1 # 5
+  # controller_min        = 1 // Do not modify
+  # controller_max        = 1 // Do not modify
+  # etcd_min              = 3 // Do not modify
+  # etcd_max              = 4 // Do not modify
+  # worker_min            = 3
+  # worker_max            = 5
 }
 
 kubernetes {
