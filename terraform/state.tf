@@ -1,22 +1,7 @@
-// Pull in remote state of base VPC
-data "terraform_remote_state" "vpc" {
-  backend = "local"
-
-  config {
-    path = "../deploy-vpc-aws/config/cluster.state"
-  }
-}
-
-// Pick a random PUBLIC subnet from AZ list (Eg: for bastion in random AZ)
-resource "random_shuffle" "random_az" {
-  input = ["${data.terraform_remote_state.vpc.vpc_subnets_public}"]
-  result_count = 1
-}
-
 // Define backend state location of this template (Used for remote state elsewhere)
 # terraform {
 #   backend "local" {
-#     path = "config/cluster.state"
+#     path = "config/terraform.tfstate"
 #   }
 # }
 
@@ -29,6 +14,23 @@ resource "random_shuffle" "random_az" {
 #     encrypt = true
 #   }
 # }
+
+// Pull in remote state of base VPC
+data "terraform_remote_state" "vpc" {
+  backend = "local"
+
+  config {
+    // This is required to read the state of the deployed VPC used in other repo:
+    // https://github.com/KptnKMan/deploy-vpc-aws
+    path = "../deploy-vpc-aws/terraform.tfstate"
+  }
+}
+
+// Pick a random PUBLIC subnet from AZ list (Eg: for bastion in random AZ)
+resource "random_shuffle" "random_az" {
+  input = ["${data.terraform_remote_state.vpc.vpc_subnets_public}"]
+  result_count = 1
+}
 
 //Outputs
 output "path_module" {

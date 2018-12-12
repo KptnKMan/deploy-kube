@@ -42,7 +42,6 @@ variable "s3_state_bucket" {
 
 variable "dns_domain_public" {
   type                    = "string"
-  default                 = "mydomain.com"
 }
 
 variable "dns_urls" {
@@ -65,15 +64,15 @@ variable "dns_urls" {
 variable "instance_types" {
   type = "map"
   default = {
-    controller            = "m4.large"
-    etcd                  = "m4.large"
-    worker                = "m4.2xlarge"
+    controller            = "m3.medium"
+    etcd                  = "m3.medium"
+    worker                = "m3.medium"
 
     controller_wait       = "PT160S"
     etcd_wait             = "PT300S"
     worker_wait           = "PT200S"
 
-    spot_max_bid          = "7.2"
+    spot_max_bid          = "0.073"
   }
 }
 
@@ -92,7 +91,7 @@ variable "instances" {
 variable "kubernetes" {
   type = "map"
   default = {
-    docker_version        = "18.3.1"
+    docker_version        = "18.03.1"
     kube_version          = "1.12.2"
     flannel_version       = "0.10.0"
     etcd_version          = "3.2.25"
@@ -102,7 +101,7 @@ variable "kubernetes" {
     authorization_mode    = "Node,RBAC,AlwaysAllow"
     admission_control     = "AlwaysAdmit,NamespaceLifecycle,LimitRanger,ServiceAccount,ResourceQuota"
 
-    flannel_network       = "192.168.0.0/16"
+    flannel_network       = "10.200.0.0/16"
     service_ip_range      = "10.5.0.0/24"
     service_ip            = "10.5.0.1"
     cluster_dns           = "10.5.0.10"
