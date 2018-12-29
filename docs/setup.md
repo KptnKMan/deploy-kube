@@ -8,6 +8,39 @@ This doc is intended to:
 
 * Currently, nearly all setup details are identical to those in the [base vpc template setup doc](https://github.com/KptnKMan/deploy-vpc-aws/blob/master/docs/setup.md).
 * Any contradiction of requirements/instructions, use the child templates (THIS TEMPLATE IS A CHILD TEMPLATE) instructions.
+* Pay attention to versions used. Use latest at your own risk.
+* Unless specified, all commands are in bash (Linux/MacOS) or Powershell v4+ (Windows), make sure your OS and package mgmt tool is updated (Eg: `apt-get update`)
+* MacOS is assumed to be MacOSX (MacOS 10.12.6 tested)
+* Linux is assumed to be Ubuntu 16.04
+* Windows is assumed to be Microsoft Windows 10
+* Unless specified, all commands are run from root of repo directory
+  * Eg: `cd ~/Projects/deploy-kube)` (but your root dir is very likely to be different)
+* Remember to tear down this environment before the base vpc template.
+
+## TL;DR / Quickstart
+
+Here are the quick start instructions, using bash:
+
+```bash
+# setup variables
+export TF_VAR_aws_access_key=AKIYOURACCESSKEYHERE
+export TF_VAR_aws_secret_key=kTHISISWHEREYOUPUTYOURAWSSECRETKEYHEREt1
+export TF_VAR_aws_region=eu-west-1
+
+# setup TF environment
+terraform get terraform
+terraform init terraform
+terraform plan terraform
+terraform apply terraform
+
+# destroy environment
+terraform destroy terraform
+
+# cleanup
+./debug_cleanup.sh
+```
+
+More detailed instructions are below.
 
 ## Setup Tools
 
@@ -51,7 +84,7 @@ Example details of spinning up an example functioning and working cluster will b
 
 ## Cleanup
 
-### Notes
+### Extra Notes
 
 * Remember to tear down this environment before the base vpc template.
 
